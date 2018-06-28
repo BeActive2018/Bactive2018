@@ -15,8 +15,8 @@ import android.os.Bundle;
 import android.os.IBinder;
 
 public class StepCount extends IntentService implements SensorEventListener {
-    private long mstepsTakenTot;
-    private int mstepsTakensince12AM;
+    private static long mstepsTakenTot;
+    private static int mstepsTakensince12AM;
     private int mLastStep;
 
     private final static long SAVE_OFFSET_TIME = AlarmManager.INTERVAL_HALF_HOUR;
@@ -29,6 +29,14 @@ public class StepCount extends IntentService implements SensorEventListener {
     private IBinder mBinder;
     private boolean mAllowRebind;
 
+    public static int getMstepsTakensince12AM()
+    {
+        return mstepsTakensince12AM;
+    }
+    public static long getMstepsTakenTot()
+    {
+        return mstepsTakenTot;
+    }
 
     public StepCount() {
         super("StepCount");
@@ -48,6 +56,16 @@ public class StepCount extends IntentService implements SensorEventListener {
                 mLastStep=(int)e.values[0];
             }
             mstepsTakensince12AM = (int)e.values[0]-mLastStep;
+
+                Intent intent = new Intent();
+                intent.setAction(String.valueOf(mstepsTakensince12AM));
+                intent.setAction(String.valueOf(mstepsTakenTot));
+
+                intent.putExtra("DATA_STEPS_TODAY", mstepsTakensince12AM);
+                intent.putExtra("DATA_STEP_TOTAL", mstepsTakenTot);
+                sendBroadcast(intent);
+
+
     }
 
     public static boolean isCompatibleAndroid(PackageManager pm)
@@ -75,6 +93,7 @@ public class StepCount extends IntentService implements SensorEventListener {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
+
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         mStepCounter= mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         return mStartMode;
@@ -83,7 +102,12 @@ public class StepCount extends IntentService implements SensorEventListener {
     @Override
     public void onDestroy()
     {
-        mSensorManager.unregisterListener(this);
+
+        Intent intent = new Intent("org.swanseacharm.bactive");
+        intent.putExtra("STEPS_SO_FAR",mstepsTakenTot);
+        intent.putExtra("STEPS_SINCE_12AM",mstepsTakensince12AM);
+        intent.putExtra("LAST_STEP",mLastStep);
+        sendBroadcast(intent);
     }
 
     @Override
