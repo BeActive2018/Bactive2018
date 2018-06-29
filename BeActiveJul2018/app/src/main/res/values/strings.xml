@@ -3,4 +3,11 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="app_name_real">Be Active!</string>
+    <string name="temp_text">Temp Text</string>
+    <string name="factor1">Steps</string>
+    <string name="factor2">Calories</string>
+    <string name="factor3">Distance</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="history">History</string>
 </resources>
