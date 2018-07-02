@@ -14,10 +14,15 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 
+import org.swanseacharm.bactive.BuildConfig;
+
+import java.util.logging.Logger;
+
 public class StepCount extends IntentService implements SensorEventListener {
     private static long mstepsTakenTot;
     private static int mstepsTakensince12AM;
     private int mLastStep;
+    private String my_Action = "MY_ACTION";
 
     private final static long SAVE_OFFSET_TIME = AlarmManager.INTERVAL_HALF_HOUR;
     private final static int SAVE_OFFSET_STEPS = 500;
@@ -49,13 +54,16 @@ public class StepCount extends IntentService implements SensorEventListener {
     }
 
     @Override
-    public void onSensorChanged(SensorEvent e)
+    public void onSensorChanged(final SensorEvent e)
     {
-            if(mLastStep<1)
+            if(e.values[0]>Integer.MAX_VALUE)
             {
-                mLastStep=(int)e.values[0];
+                return;
             }
-            mstepsTakensince12AM = (int)e.values[0]-mLastStep;
+            else
+            {
+                mstepsTakensince12AM = (int) e.values[0];
+            }
 
                 Intent intent = new Intent();
                 intent.setAction(String.valueOf(mstepsTakensince12AM));
@@ -68,7 +76,7 @@ public class StepCount extends IntentService implements SensorEventListener {
 
     }
 
-    public static boolean isCompatibleAndroid(PackageManager pm)
+    public boolean isCompatibleAndroid(PackageManager pm)
     {
         //min version Android KitKat
         int currentAPIVersion = (int) Build.VERSION.SDK_INT;
@@ -104,6 +112,7 @@ public class StepCount extends IntentService implements SensorEventListener {
     {
 
         Intent intent = new Intent("org.swanseacharm.bactive");
+        intent.setAction(my_Action);
         intent.putExtra("STEPS_SO_FAR",mstepsTakenTot);
         intent.putExtra("STEPS_SINCE_12AM",mstepsTakensince12AM);
         intent.putExtra("LAST_STEP",mLastStep);
