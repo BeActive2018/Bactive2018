@@ -26,10 +26,10 @@ public class MainActivity extends AppCompatActivity {
     private int mStepsPerCal = 20;
     private double mMetersPerStep = 0.701;
 
-    private Receiver receiver;
+    private BroadcastReceiver receiver;
 
-    private int mStepsToday;
-    private long mTotSteps;
+    private int mStepsToday=0;
+    private long mTotSteps=0;
 
 
 
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         Log.i("BACTIVE INFO:", "onCreate called in mainActivity");
-        
+
     }
 
     @Override
@@ -47,12 +47,25 @@ public class MainActivity extends AppCompatActivity {
     {
         super.onStart();
 
-        receiver=new Receiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(String.valueOf(org.swanseacharm.bactive.services.StepCount.getMstepsTakensince12AM()));
-        intentFilter.addAction(String.valueOf(org.swanseacharm.bactive.services.StepCount.getMstepsTakenTot()));
-        registerReceiver(receiver,intentFilter);
 
+        IntentFilter intentFilter = new IntentFilter("android.intent.action.MAIN");
+        this.registerReceiver(receiver,intentFilter);
+
+
+        receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                int todaySteps = intent.getIntExtra("DATA_STEPS_TODAY",0);
+                long totSteps = intent.getLongExtra("DATA_STEP_TOTAL",0);
+                binding.stepsTakenToday.setText(todaySteps);
+                binding.textView9.setText(todaySteps/mStepsPerCal);
+                binding.textView10.setText(String.valueOf(todaySteps*mMetersPerStep));
+                binding.textView6.setText(intent.getStringExtra("TEST_BROADCAST"));
+                binding.textView4.setText("Broadcast recieved");
+            }
+        };
+
+        startService(new Intent(this,org.swanseacharm.bactive.services.StepCount.class));
 
     }
 
@@ -60,20 +73,21 @@ public class MainActivity extends AppCompatActivity {
     public void onResume()
     {
         super.onResume();
-
+        IntentFilter intentFilter = new IntentFilter("android.intent.action.main");
+        this.registerReceiver(receiver,intentFilter);
     }
 
     @Override
     public void onPause()
     {
         super.onPause();
+        this.unregisterReceiver(this.receiver);
     }
 
     @Override
     public void onStop()
     {
         super.onStop();
-        unregisterReceiver(receiver);
 
     }
 
@@ -84,20 +98,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private class Receiver extends BroadcastReceiver
-    {
-        @Override
-        public void onReceive(Context arg1, Intent arg2)
-        {
 
-            int todaySteps = arg2.getIntExtra("DATA_STEPS_TODAY",0);
-            long totSteps = arg2.getLongExtra("DATA_STEP_TOTAL",0);
-            binding.stepsTakenToday.setText(todaySteps);
-            binding.textView9.setText(todaySteps/mStepsPerCal);
-            binding.textView10.setText(String.valueOf(todaySteps*mMetersPerStep));
-
-        }
-    }
 
 }
 

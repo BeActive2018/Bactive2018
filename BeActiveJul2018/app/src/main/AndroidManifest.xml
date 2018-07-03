@@ -3,7 +3,7 @@
     package="org.swanseacharm.bactive">
 
     <uses-feature android:name="android.hardware.sensor.stepcounter" />
-
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETE_BOOT_COMPLETED"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -19,6 +19,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
 
         <service
@@ -31,10 +32,16 @@
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="org.swanseacharm.bactive.receivers"/>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".services.StepCounter"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
+
+
 
 </manifest>
