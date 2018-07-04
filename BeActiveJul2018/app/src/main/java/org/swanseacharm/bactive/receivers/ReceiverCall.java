@@ -9,7 +9,10 @@ public class ReceiverCall extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i("Service stopped","service stopped, restarting service");
-        context.startService(new Intent(context,org.swanseacharm.bactive.services.StepCount.class));
+        Log.i(ReceiverCall.class.getSimpleName(),"service stopped, restarting service");
+        context.startService(new Intent(context,org.swanseacharm.bactive.services.StepCounter.class)
+                .putExtra("DATA_STEPS_SINCE_TWELVE",intent.getIntExtra("DATA_STEPS_SINCE_TWELVE",0))
+                .putExtra("DATA_OLD_STEPS",intent.getIntExtra("DATA_OLD_STEPS",0)));
+
     }
 }

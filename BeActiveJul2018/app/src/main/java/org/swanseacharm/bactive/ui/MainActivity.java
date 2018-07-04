@@ -7,17 +7,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
-import android.widget.TextView;
 import android.util.Log;
 
 import org.swanseacharm.bactive.R;
 import org.swanseacharm.bactive.databinding.ActivityMainBinding;
+import org.swanseacharm.bactive.services.StepCounter;
 
-import java.util.logging.Logger;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,6 +21,14 @@ public class MainActivity extends AppCompatActivity {
 
     private int mStepsPerCal = 20;
     private double mMetersPerStep = 0.701;
+    private Intent mServiceIntent;
+    private StepCounter mSensorService;
+    private Context ctx;
+    private String tag = "MAINACTIVITY";
+
+    public Context getCtx() {
+        return ctx;
+    }
 
     private BroadcastReceiver receiver;
 
@@ -36,6 +40,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ctx = this;
+        mSensorService = new StepCounter(getCtx());
+        mServiceIntent = new Intent(getCtx(),mSensorService.getClass());
+
+        if(!isMyServiceRunning(mSensorService.getClass()))
+        {
+            startService(mServiceIntent);
+        }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         Log.i("BACTIVE INFO:", "onCreate called in mainActivity");
@@ -47,34 +59,27 @@ public class MainActivity extends AppCompatActivity {
     {
         super.onStart();
 
-
-        IntentFilter intentFilter = new IntentFilter("android.intent.action.MAIN");
-        this.registerReceiver(receiver,intentFilter);
-
-
-        receiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                int todaySteps = intent.getIntExtra("DATA_STEPS_TODAY",0);
-                long totSteps = intent.getLongExtra("DATA_STEP_TOTAL",0);
-                binding.stepsTakenToday.setText(todaySteps);
-                binding.textView9.setText(todaySteps/mStepsPerCal);
-                binding.textView10.setText(String.valueOf(todaySteps*mMetersPerStep));
-                binding.textView6.setText(intent.getStringExtra("TEST_BROADCAST"));
-                binding.textView4.setText("Broadcast recieved");
-            }
-        };
-
-        startService(new Intent(this,org.swanseacharm.bactive.services.StepCount.class));
-
     }
 
     @Override
     public void onResume()
     {
         super.onResume();
-        IntentFilter intentFilter = new IntentFilter("android.intent.action.main");
+        IntentFilter intentFilter = new IntentFilter("org.swanseacharm.bactive.ui");
+        receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int todaySteps = intent.getIntExtra("DATA_STEPS_TODAY",0);
+            long totSteps = intent.getLongExtra("DATA_STEP_TOTAL",0);
+            binding.stepsTakenToday.setText(String.valueOf(todaySteps));
+            binding.textView9.setText(String.valueOf(todaySteps/mStepsPerCal));
+            binding.textView10.setText(String.valueOf(((todaySteps*mMetersPerStep)/1000)));
+            Log.i("Main activity", "broadcast recieved");
+        }
+    };
         this.registerReceiver(receiver,intentFilter);
+
+
     }
 
     @Override
@@ -95,6 +100,21 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy()
     {
         super.onDestroy();
+        stopService(mServiceIntent);
+        Log.i(tag,"Stopping service");
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass)
+    {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+        {
+            if(serviceClass.getName().equals(service.service.getClassName()))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 
