@@ -14,6 +14,8 @@ import org.swanseacharm.bactive.R;
 import org.swanseacharm.bactive.databinding.ActivityMainBinding;
 import org.swanseacharm.bactive.services.StepCounter;
 
+import java.text.DecimalFormat;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -69,15 +71,20 @@ public class MainActivity extends AppCompatActivity {
         receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            DecimalFormat df = new DecimalFormat("#,##");
             int todaySteps = intent.getIntExtra("DATA_STEPS_TODAY",0);
             long totSteps = intent.getLongExtra("DATA_STEP_TOTAL",0);
             binding.stepsTakenToday.setText(String.valueOf(todaySteps));
             binding.textView9.setText(String.valueOf(todaySteps/mStepsPerCal));
-            binding.textView10.setText(String.valueOf(((todaySteps*mMetersPerStep)/1000)));
+            binding.textView10.setText(String.valueOf(Double.valueOf(df.format((todaySteps*mMetersPerStep)/1000))));
             Log.i("Main activity", "broadcast recieved");
         }
     };
-        this.registerReceiver(receiver,intentFilter);
+        this.registerReceiver(this.receiver,intentFilter);
+
+        Intent intent = new Intent("org.swanseacharm.bactive.services")
+                .putExtra("REQUEST_FRESH_DATA",true);
+        sendBroadcast(intent);
 
 
     }
