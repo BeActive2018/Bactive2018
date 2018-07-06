@@ -9,6 +9,8 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import org.swanseacharm.bactive.R;
 import org.swanseacharm.bactive.databinding.ActivityMainBinding;
@@ -33,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private BroadcastReceiver receiver;
+    private Button yesterday;
+    private Button history;
 
     private int mStepsToday=0;
     private long mTotSteps=0;
@@ -52,8 +56,28 @@ public class MainActivity extends AppCompatActivity {
         }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        yesterday = (Button)findViewById(R.id.button5);
+        yesterday.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                startYesterday();
+            }
+        });
+
+        history = (Button)findViewById(R.id.button7);
+        history.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                //TODO navigate back to history
+            }
+        });
         Log.i("BACTIVE INFO:", "onCreate called in mainActivity");
 
+    }
+
+    public void startYesterday()
+    {
+        Intent intent = new Intent(this,org.swanseacharm.bactive.ui.Yesterday.class);
+        startActivity(intent);
     }
 
     @Override

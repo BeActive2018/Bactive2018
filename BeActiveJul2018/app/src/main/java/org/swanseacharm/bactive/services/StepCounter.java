@@ -1,5 +1,7 @@
 package org.swanseacharm.bactive.services;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -116,6 +119,11 @@ public class StepCounter extends Service {
                     Log.i(tag,"Sending history");
                     sendBroadcast(new Intent("org.swanseacharm.bactive.ui").putExtra("DATA_HISTORY",getfile(getBaseContext())));
                 }
+                if(intent.getBooleanExtra("REQUEST_SAVE_DATA",false))
+                {
+                    updateDecide();
+                    startTask();
+                }
             }
         };
         this.registerReceiver(mBootReciever,intentFilter);
@@ -163,57 +171,45 @@ public class StepCounter extends Service {
                 .putExtra("DATA_LAST_SAVE",lastSave);
 
         sendBroadcast(broadcastIntent);
-        stopTask();
         this.unregisterReceiver(mBootReciever);
         this.unregisterReceiver(mMultiReceiver);
     }
 
     public void startTask()
     {
+        Intent intent = new Intent(this,org.swanseacharm.bactive.services.StepCounter.class).putExtra("REQUEST_SAVE_DATA",true);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(),234324243,intent,0);
+        AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
 
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 11);
+        calendar.set(Calendar.MINUTE, 55);
 
-
-        timer = new Timer();
-
-        initializeTimerTask();
-
-        timer.schedule(timerTask, saveInterval,1000);
+        alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
     }
 
-    public void initializeTimerTask()
+    public void updateDecide()
     {
-        timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                Log.i(tag+" timer","saving");
+        Log.i(tag,"Save decide");
 
-                SimpleDateFormat formatterDate = new SimpleDateFormat("yyyyMMdd");
-                Date date = new Date();
-                Log.i(tag,"Data last save ="+lastSave);
-                Log.i(tag,"Data current date ="+Integer.parseInt(formatterDate.format(date)));
-                if(lastSave == null)
-                {
-                    lastSave = "00000000";
-                }
-                if(Integer.parseInt(lastSave)
-                        <Integer.parseInt(formatterDate.format(date)))
-                {
-                    updateFile();
-                }
-
-            }
-        };
-    }
-
-    public void stopTask()
-    {
-        if (timer!=null)
+        SimpleDateFormat formatterDate = new SimpleDateFormat("yyyyMMdd");
+        Date date = new Date();
+        Log.i(tag,"Data last save ="+lastSave);
+        Log.i(tag,"Data current date ="+Integer.parseInt(formatterDate.format(date)));
+        if(lastSave == null)
         {
-            timer.cancel();
-            timer=null;
+            lastSave = "00000000";
         }
-
+        if(Integer.parseInt(lastSave)
+                <Integer.parseInt(formatterDate.format(date)))
+        {
+            updateFile();
+        }
     }
+
+
+
 
     public String getfile(Context context)
     {
