@@ -47,7 +47,7 @@
         </receiver>
 
         <activity android:name=".ui.Yesterday" />
-
+        <activity android:name=".ui.History"></activity>
     </application>
 
 </manifest>

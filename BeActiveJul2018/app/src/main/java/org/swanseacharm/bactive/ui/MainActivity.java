@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            DecimalFormat df = new DecimalFormat("#,##");
+            DecimalFormat df = new DecimalFormat("#.##");
             int todaySteps = intent.getIntExtra("DATA_STEPS_TODAY",0);
             long totSteps = intent.getLongExtra("DATA_STEP_TOTAL",0);
             binding.stepsTakenToday.setText(String.valueOf(todaySteps));
