@@ -1,6 +1,8 @@
 package org.swanseacharm.bactive.ui;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -52,14 +54,17 @@ public class Yesterday extends AppCompatActivity {
         home = (Button)findViewById(R.id.button6);
         home.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                //TODO navigate back to main
+                finish();
             }
         });
 
         history = (Button)findViewById(R.id.button7);
         history.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                //TODO navigate back to history
+                Intent intent = new Intent(Yesterday.this,org.swanseacharm.bactive.ui.History.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+                finish();
             }
         });
     }
@@ -121,7 +126,8 @@ public class Yesterday extends AppCompatActivity {
     private int getYesterdaySteps()
     {
         String fileStr = getFileFull(getBaseContext());
-        ArrayList<String> stringArrayList = (ArrayList<String>) Arrays.asList(fileStr.split(seperator));
+        ArrayList<String> stringArrayList = new ArrayList<String>();
+        stringArrayList.addAll(Arrays.asList(fileStr.split(seperator)));
         for(String str:stringArrayList)
         {
             if(str.matches(""+getYesterdayString()+"$"))
@@ -131,5 +137,12 @@ public class Yesterday extends AppCompatActivity {
             }
         }
         return 0;
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        overridePendingTransition(0,0);
     }
 }

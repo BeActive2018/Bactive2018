@@ -60,24 +60,22 @@ public class MainActivity extends AppCompatActivity {
         yesterday = (Button)findViewById(R.id.button5);
         yesterday.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                startYesterday();
+                Intent intent = new Intent(MainActivity.this,org.swanseacharm.bactive.ui.Yesterday.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
             }
         });
 
         history = (Button)findViewById(R.id.button7);
         history.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                //TODO navigate back to history
+                Intent intent = new Intent(MainActivity.this,org.swanseacharm.bactive.ui.History.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
             }
         });
         Log.i("BACTIVE INFO:", "onCreate called in mainActivity");
 
-    }
-
-    public void startYesterday()
-    {
-        Intent intent = new Intent(this,org.swanseacharm.bactive.ui.Yesterday.class);
-        startActivity(intent);
     }
 
     @Override
