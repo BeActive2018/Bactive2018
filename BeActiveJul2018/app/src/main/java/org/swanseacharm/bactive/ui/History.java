@@ -1,27 +1,62 @@
 package org.swanseacharm.bactive.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import org.swanseacharm.bactive.R;
 import org.swanseacharm.bactive.databinding.ActivityHistoryBinding;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+
+import com.jjoe64.graphview.series.LineGraphSeries;
+
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 public class History extends AppCompatActivity {
 
+    private String tag = "History";
+    private String fileName = "stepHistory.stp";
+    private String deliminator = ",";
+    private String seperator = "/n";
+
+    private Calendar firstDayOfWeek;
+    private Calendar thisWeekStart;
 
     private Button home;
     private Button yesterday;
+    private ImageButton lastWeekButton;
+    private ImageButton nextWeekButton;
 
     ActivityHistoryBinding binding;
+
+    private GraphView graph;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_history);
+        setStartOfThisWeek();
+        graph = (GraphView) findViewById(R.id.graph);
 
         home = (Button)findViewById(R.id.button6);
         home.setOnClickListener(new View.OnClickListener(){
@@ -39,6 +74,26 @@ public class History extends AppCompatActivity {
                 finish();
             }
         });
+        nextWeekButton = (ImageButton)findViewById(R.id.imageButton2);
+        nextWeekButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                nextWeek();
+                updateGraph();
+            }
+        }
+    );
+
+        lastWeekButton = (ImageButton)findViewById(R.id.imageButton);
+        lastWeekButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                lastWeek();
+                updateGraph();
+            }
+        });
+
+
     }
 
     @Override
@@ -46,5 +101,219 @@ public class History extends AppCompatActivity {
     {
         super.onPause();
         overridePendingTransition(0,0);
+    }
+
+    private void updateGraph()
+    {
+
+        graph.removeAllSeries();
+        ArrayList<Integer> weekSteps = getWeekSteps();
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
+                new DataPoint(0, weekSteps.get(0)),
+                new DataPoint(1, weekSteps.get(1)),
+                new DataPoint(2, weekSteps.get(2)),
+                new DataPoint(3, weekSteps.get(3)),
+                new DataPoint(4, weekSteps.get(4)),
+                new DataPoint(5,weekSteps.get(5)),
+                new DataPoint(6,weekSteps.get(6))
+        });
+        graph.addSeries(series);
+    }
+
+    private String getDateString(Date calender)//converts a single Date object into a string
+    {
+        SimpleDateFormat formatterDate = new SimpleDateFormat("yyyyMMdd");
+        return formatterDate.format(calender);
+    }
+
+    private void nextWeek()
+    {
+
+        Log.i(tag,"nextWeek() called");
+        firstDayOfWeek.add(firstDayOfWeek.DATE,+7);
+        if(firstDayOfWeek.after(thisWeekStart))
+        {
+            Log.i(tag,"week too far ahead");
+            firstDayOfWeek.add(firstDayOfWeek.DATE,-7);
+            binding.imageButton2.setVisibility(View.GONE);
+        }
+        Log.i(tag,"firstDayOfWeek milli="+getDateString(firstDayOfWeek.getTime()));
+        Log.i(tag,"thisWeekStart milli="+getDateString(thisWeekStart.getTime()));
+        if(getDateString(firstDayOfWeek.getTime()).equals(getDateString(thisWeekStart.getTime())))
+        {
+            Log.i(tag,"This week selected");
+            binding.imageButton2.setVisibility(View.GONE);
+        }
+        else
+        {
+            Log.i(tag,"Not this week selected");
+            binding.imageButton2.setVisibility(View.VISIBLE);
+        }
+    }
+    private void lastWeek()
+    {
+        Log.i(tag,"lastWeek() called");
+        binding.imageButton2.setVisibility(View.VISIBLE);
+        Log.i(tag,"old time="+getDateString(firstDayOfWeek.getTime()));
+        firstDayOfWeek.add(Calendar.DATE,-7);
+        Log.i(tag,"new time="+getDateString(firstDayOfWeek.getTime()));
+
+    }
+    private void setStartOfThisWeek()//sets firstDayOfWeek to this week
+    {
+        Log.i(tag,"setStartOfThisWeek() called");
+        firstDayOfWeek = Calendar.getInstance(TimeZone.getTimeZone("GB"), Locale.UK);
+        firstDayOfWeek.set(Calendar.DATE,firstDayOfWeek.getFirstDayOfWeek());
+        thisWeekStart = Calendar.getInstance(TimeZone.getTimeZone("GB"), Locale.UK);
+        thisWeekStart.set(Calendar.DATE,thisWeekStart.getFirstDayOfWeek());
+    }
+
+    private Date endOfThisWeek()//gets the end of the current week
+    {
+        final Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DATE,calendar.getFirstDayOfWeek());
+        calendar.add(Calendar.DATE,+7);
+        return calendar.getTime();
+    }
+
+    private ArrayList<Date> getWeekPeriod(Calendar startOfPeriodCalender) //calculates every date for the week given a
+                                                                        // calender object starting on the first day of the week.
+    {
+        ArrayList<Date> dates = new ArrayList<>();
+        dates.add(startOfPeriodCalender.getTime());
+        startOfPeriodCalender.add(Calendar.DATE,+1);
+        dates.add(startOfPeriodCalender.getTime());
+        startOfPeriodCalender.add(Calendar.DATE,+1);
+        dates.add(startOfPeriodCalender.getTime());
+        startOfPeriodCalender.add(Calendar.DATE,+1);
+        dates.add(startOfPeriodCalender.getTime());
+        startOfPeriodCalender.add(Calendar.DATE,+1);
+        dates.add(startOfPeriodCalender.getTime());
+        startOfPeriodCalender.add(Calendar.DATE,+1);
+        dates.add(startOfPeriodCalender.getTime());
+        startOfPeriodCalender.add(Calendar.DATE,+1);
+        dates.add(startOfPeriodCalender.getTime());
+        startOfPeriodCalender.add(Calendar.DATE,-6);
+
+        return dates;
+    }
+
+    private ArrayList<String> getFullWeekDates()//converts GetWeekPeriod's array to array of strings for parsing
+    {
+        ArrayList<String> dates = new ArrayList<>();
+        ArrayList<Date> weekDates = getWeekPeriod(firstDayOfWeek);
+        dates.add(getDateString(weekDates.get(0)));
+        dates.add(getDateString(weekDates.get(1)));
+        dates.add(getDateString(weekDates.get(2)));
+        dates.add(getDateString(weekDates.get(3)));
+        dates.add(getDateString(weekDates.get(4)));
+        dates.add(getDateString(weekDates.get(5)));
+        dates.add(getDateString(weekDates.get(6)));
+
+        return dates;
+    }
+
+    private ArrayList<Integer> getWeekSteps()
+    {
+        String fileStr = getFileFull(getBaseContext());
+        ArrayList<String> stringArrayList = new ArrayList<String>();
+        stringArrayList.addAll(Arrays.asList(fileStr.split(seperator)));
+        ArrayList<Integer> week = new ArrayList<Integer>();
+        for(int i=0;i<=6;i++)
+        {
+            week.add(0);
+        }
+        ArrayList<String> weekDays = getFullWeekDates();
+        for(String str:stringArrayList)
+        {
+            if(isAllNull(weekDays))
+            {
+                break;
+            }
+
+            if(str.matches((""+weekDays.get(0)+"$")))
+            {
+                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                week.set(0,Integer.valueOf(holder.get(0)));
+                weekDays.set(0,null);
+            }
+            else if(str.matches((""+weekDays.get(1)+"$")))
+            {
+                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                week.set(1,Integer.valueOf(holder.get(0)));
+                weekDays.set(1,null);
+            }
+            else if(str.matches((""+weekDays.get(2)+"$")))
+            {
+                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                week.set(2,Integer.valueOf(holder.get(0)));
+                weekDays.set(2,null);
+            }
+            else if(str.matches((""+weekDays.get(3)+"$")))
+            {
+                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                week.set(3,Integer.valueOf(holder.get(0)));
+                weekDays.set(3,null);
+            }
+            else if(str.matches((""+weekDays.get(4)+"$")))
+            {
+                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                week.set(4,Integer.valueOf(holder.get(0)));
+                weekDays.set(4,null);
+            }
+            else if(str.matches((""+weekDays.get(5)+"$")))
+            {
+                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                week.set(5,Integer.valueOf(holder.get(0)));
+                weekDays.set(5,null);
+            }
+            else if(str.matches((""+weekDays.get(6)+"$")))
+            {
+                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                week.set(6,Integer.valueOf(holder.get(0)));
+                weekDays.set(6,null);
+            }
+        }
+
+        return week;
+    }
+
+    public boolean isAllNull(Iterable<?> array)
+    {
+        for (Object element:array)
+            if(element!=null) return false;
+        return true;
+    }
+
+    private String getFileFull(Context context)
+    {
+        String ret = "";
+        try{
+            InputStream inputStream = context.openFileInput(fileName);
+
+            if(inputStream!=null)
+            {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String recieveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ((recieveString = bufferedReader.readLine())!=null)
+                {
+                    stringBuilder.append(recieveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch(FileNotFoundException e){
+            Log.e(tag, e.toString());
+        }
+        catch (IOException e){
+            Log.e(tag, e.toString());
+        }
+
+        return ret;
     }
 }

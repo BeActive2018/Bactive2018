@@ -15,6 +15,8 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import org.swanseacharm.bactive.receivers.AlarmReceiver;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,6 +28,8 @@ import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -84,9 +88,12 @@ public class StepCounter extends Service {
         Intent intent = new Intent("org.swanseacharm.bactive.ui")
                 .putExtra("DATA_STEPS_TODAY",stepsSince12);
         Log.i(tag,"sendFreshData broadcast "+ stepsSince12);
+        Intent intent2 = new Intent("SaveDataService")
+                .putExtra("DATA_STEPS_TODAY",stepsSince12);
 
         Log.d(tag,"old steps = "+oldSteps);
         sendBroadcast(intent);
+        sendBroadcast(intent2);
     }
 
     @Override
@@ -95,6 +102,7 @@ public class StepCounter extends Service {
         super.onCreate();
         //Recieve if a boot has happened
         IntentFilter intentFilter = new IntentFilter("org.swanseacharm.bactive.services");
+
         mBootReciever = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -109,6 +117,7 @@ public class StepCounter extends Service {
         mMultiReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                Log.i(tag,"MultiReciever receiving");
                 if(intent.getBooleanExtra("REQUEST_FRESH_DATA",false))
                 {
                     Log.i(tag,"Fresh data request made");
@@ -121,8 +130,9 @@ public class StepCounter extends Service {
                 }
                 if(intent.getBooleanExtra("REQUEST_SAVE_DATA",false))
                 {
-                    updateDecide();
-                    startTask();
+                    //updateDecide();
+                    updateFile();
+                    Log.i(tag,"Saving data to file");
                 }
             }
         };
@@ -140,7 +150,11 @@ public class StepCounter extends Service {
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mStepSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         mSensorManager.registerListener(mSensorEventListener,mStepSensor,SensorManager.SENSOR_DELAY_NORMAL);
-        stepsSince12 = intent.getIntExtra("DATA_STEPS_SINCE_TWELVE",0);
+        if(!String.valueOf(intent.getIntExtra("DATA_STEPS_SINCE_TWELVE",0)).equals(""))
+        {
+            stepsSince12 = intent.getIntExtra("DATA_STEPS_SINCE_TWELVE",0);
+        }
+
         lastSave = intent.getStringExtra("DATA_LAST_SAVE");
         if(lastSave == "")
         {
@@ -177,16 +191,22 @@ public class StepCounter extends Service {
 
     public void startTask()
     {
-        Intent intent = new Intent(this,org.swanseacharm.bactive.services.StepCounter.class).putExtra("REQUEST_SAVE_DATA",true);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(),234324243,intent,0);
-        AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+        /*Intent intent = new Intent(this,org.swanseacharm.bactive.services.StepCounter.class).putExtra("REQUEST_SAVE_DATA",true);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(),234324243,intent,0);*/
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 11);
-        calendar.set(Calendar.MINUTE, 55);
+        //Intent intent =  new Intent(StepCounter.this,AlarmReceiver.class);
+        Intent intent = new Intent("org.swanseacharm.bactive.receivers");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(StepCounter.this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
 
-        alarmManager.set(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),pendingIntent);
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GB"), Locale.UK);
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, 15);
+        calendar.set(Calendar.MINUTE, 6);
+        //calendar.add(Calendar.DATE,+1);
+
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP,calendar.getTimeInMillis(),alarmManager.INTERVAL_DAY,pendingIntent);
+        Log.i(tag,"Alarm made for "+calendar.getTime()+" ");
     }
 
     public void updateDecide()
@@ -267,6 +287,7 @@ public class StepCounter extends Service {
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mStepSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         mSensorManager.registerListener(mSensorEventListener,mStepSensor,SensorManager.SENSOR_DELAY_NORMAL);
+        Log.i(tag,"File update");
         }
 
 

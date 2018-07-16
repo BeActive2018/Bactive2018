@@ -4,7 +4,9 @@
 
     <uses-feature android:name="android.hardware.sensor.stepcounter" />
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.alarm.permission.SET_ALARM"/>
 
     <application
         android:allowBackup="true"
@@ -47,7 +49,21 @@
         </receiver>
 
         <activity android:name=".ui.Yesterday" />
-        <activity android:name=".ui.History"></activity>
+        <activity android:name=".ui.History" />
+
+        <service
+            android:name=".services.SaveDataService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver
+            android:name=".receivers.AlarmReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="org.swanseacharm.bactive.receivers"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
