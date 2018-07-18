@@ -12,6 +12,7 @@ import android.widget.Button;
 
 import org.swanseacharm.bactive.R;
 import org.swanseacharm.bactive.databinding.ActivityYesterdayBinding;
+import org.swanseacharm.bactive.services.SaveDataService;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Yesterday extends AppCompatActivity {
 
@@ -47,6 +50,7 @@ public class Yesterday extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(tag,"onCreate called");
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_yesterday);
         yesterdaySteps = getYesterdaySteps();
@@ -81,6 +85,7 @@ public class Yesterday extends AppCompatActivity {
 
     private String getFileFull(Context context)
     {
+        Log.i(tag, "getting file");
         String ret = "";
         try{
             InputStream inputStream = context.openFileInput(fileName);
@@ -107,31 +112,40 @@ public class Yesterday extends AppCompatActivity {
         catch (IOException e){
             Log.e(tag, e.toString());
         }
-
+        Log.v(tag,ret+" End of file");
         return ret;
     }
 
     private String getYesterdayString()
     {
         SimpleDateFormat formatterDate = new SimpleDateFormat("yyyyMMdd");
+        Log.d(tag,formatterDate.format(yesterday()));
         return formatterDate.format(yesterday());
 
     }
     private Date yesterday()
     {
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE,-1);
+        calendar.add(Calendar.DATE,-0);//TODO change to -1
         return calendar.getTime();
     }
     private int getYesterdaySteps()
     {
-        String fileStr = getFileFull(getBaseContext());
-        ArrayList<String> stringArrayList = new ArrayList<String>();
+        String fileStr = getFileFull(this.getApplication());
+        ArrayList<String> stringArrayList = new ArrayList<>();
         stringArrayList.addAll(Arrays.asList(fileStr.split(seperator)));
+        String regex = ".*"+getYesterdayString()+"";
+        Pattern pattern;
+        Matcher matcher;
+        pattern = Pattern.compile(regex);
+
         for(String str:stringArrayList)
         {
-            if(str.matches(""+getYesterdayString()+"$"))
+            matcher = pattern.matcher(str);
+            Log.d(tag,"the outer loop"+str+" "+getYesterdayString());
+            if(matcher.matches())
             {
+                Log.d(tag,"the inner loop"+getYesterdayString());
                 stringArrayList = (ArrayList<String>)Arrays.asList(str.split(deliminator));
                 return Integer.valueOf(stringArrayList.get(0));
             }

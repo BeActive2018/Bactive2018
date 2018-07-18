@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import org.swanseacharm.bactive.services.JobSchedule;
+
 public class BootReceive extends BroadcastReceiver {
 
     @Override
@@ -20,5 +22,6 @@ public class BootReceive extends BroadcastReceiver {
         }
         Log.i("BootReceive","Sending broadcast");
         context.sendBroadcast(newIntent);
+        JobSchedule.scheduleJob(context);
     }
 }

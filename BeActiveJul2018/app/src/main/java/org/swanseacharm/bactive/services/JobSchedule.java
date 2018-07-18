@@ -1,0 +1,40 @@
+package org.swanseacharm.bactive.services;
+
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
+import android.util.Log;
+
+import java.util.Calendar;
+
+public class JobSchedule {
+    // schedule the start of the service at specific time
+    public static void scheduleJob(Context context) {
+        //Calenders to calculate how long in milliseconds to schedule the job for
+        Calendar calendar = Calendar.getInstance();
+        Calendar futureCalender = Calendar.getInstance();
+        futureCalender.setTimeInMillis(System.currentTimeMillis());
+        /*futureCalender.add(Calendar.DATE,+0);//Tomorrow
+        futureCalender.set(Calendar.HOUR_OF_DAY,13);//11PM
+        futureCalender.set(Calendar.MINUTE,15);//11:58PM
+        futureCalender.set(Calendar.SECOND,0);//11:58:00PM*/
+        futureCalender.add(Calendar.MINUTE,+1);
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        //build job
+        ComponentName serviceComponent = new ComponentName(context, JobScheduleService.class);
+        JobInfo.Builder builder = new JobInfo.Builder(0, serviceComponent);
+        builder.setMinimumLatency(futureCalender.getTimeInMillis()-calendar.getTimeInMillis()); // wait at least until 11:58:00.000
+        builder.setOverrideDeadline(futureCalender.getTimeInMillis()-calendar.getTimeInMillis()+900); // maximum delay 11:58:00.900
+        //builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED); // require unmetered network
+        //builder.setRequiresDeviceIdle(true); // device should be idle
+        //builder.setRequiresCharging(false); // we don't care if the device is charging or not
+        JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
+        jobScheduler.cancelAll();
+        jobScheduler.schedule(builder.build());//schedule job
+        Log.i("JobSchedule", "Save data job has been scheduled");
+
+    }
+
+}

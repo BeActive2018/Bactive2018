@@ -38,9 +38,6 @@ public class MainActivity extends AppCompatActivity {
     private Button yesterday;
     private Button history;
 
-    private int mStepsToday=0;
-    private long mTotSteps=0;
-
 
 
     @Override
@@ -89,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     public void onResume()
     {
         super.onResume();
-        IntentFilter intentFilter = new IntentFilter("org.swanseacharm.bactive.ui");
+        IntentFilter intentFilter = new IntentFilter("org.swanseacharm.bactive.FRESHDATA");
         receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
