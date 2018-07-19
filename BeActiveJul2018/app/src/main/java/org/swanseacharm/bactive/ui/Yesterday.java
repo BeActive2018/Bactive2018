@@ -3,6 +3,7 @@ package org.swanseacharm.bactive.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 
 import org.swanseacharm.bactive.R;
+import org.swanseacharm.bactive.Util;
 import org.swanseacharm.bactive.databinding.ActivityYesterdayBinding;
 import org.swanseacharm.bactive.services.SaveDataService;
 
@@ -30,15 +32,12 @@ import java.util.regex.Pattern;
 
 public class Yesterday extends AppCompatActivity {
 
-    public void Yesterday()
-    {
-
-    }
     //configuration variables
     private String tag = "Yesterday_Activity";
     private String fileName = "stepHistory.stp";
     private String deliminator = ",";
     private String seperator = "/n";
+
     private int mStepsPerCal = 20;
     private double mMetersPerStep = 0.701;
     //data binding variable and buttons
@@ -48,6 +47,11 @@ public class Yesterday extends AppCompatActivity {
     //steps taken yesterday (determined in onCreate()
     private int yesterdaySteps = 0;
 
+
+    public void Yesterday()
+    {
+
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(tag,"onCreate called");
@@ -71,12 +75,20 @@ public class Yesterday extends AppCompatActivity {
                 finish();
             }
         });
+        //Utility class and SharedPreferences class for application wide data management
+        Util util = new Util();
+        SharedPreferences prefs = this.getSharedPreferences(
+                "org.swanseacharm.bactive", Context.MODE_PRIVATE);
+
+        //get application wide data
+        mStepsPerCal = prefs.getInt("STEPS_PER_CAL",20);
+        mMetersPerStep = util.getDouble(prefs,"METERS_PER_STEP",0.701);
     }
 
     public void onStart()
     {
         super.onStart();
-        DecimalFormat df = new DecimalFormat("#,##");
+        DecimalFormat df = new DecimalFormat("#.##");
 
         binding.stepsTakenToday.setText(String.valueOf(yesterdaySteps));
         binding.textView9.setText(String.valueOf(yesterdaySteps/mStepsPerCal));
@@ -126,7 +138,7 @@ public class Yesterday extends AppCompatActivity {
     private Date yesterday()
     {
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE,-0);//TODO change to -1
+        calendar.add(Calendar.DATE,-1);
         return calendar.getTime();
     }
     private int getYesterdaySteps()
@@ -146,7 +158,7 @@ public class Yesterday extends AppCompatActivity {
             if(matcher.matches())
             {
                 Log.d(tag,"the inner loop"+getYesterdayString());
-                stringArrayList = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                stringArrayList = new ArrayList<>(Arrays.asList(str.split(deliminator)));
                 return Integer.valueOf(stringArrayList.get(0));
             }
         }

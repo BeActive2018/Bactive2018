@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,6 +16,7 @@ import android.widget.Button;
 import org.swanseacharm.bactive.R;
 import org.swanseacharm.bactive.databinding.ActivityMainBinding;
 import org.swanseacharm.bactive.services.StepCounter;
+import org.swanseacharm.bactive.Util;
 
 import java.text.DecimalFormat;
 
@@ -23,10 +25,11 @@ public class MainActivity extends AppCompatActivity {
 
     ActivityMainBinding binding;
 
+
     private int mStepsPerCal = 20;
     private double mMetersPerStep = 0.701;
+
     private Intent mServiceIntent;
-    private StepCounter mSensorService;
     private Context ctx;
     private String tag = "MAINACTIVITY";
 
@@ -35,25 +38,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private BroadcastReceiver receiver;
-    private Button yesterday;
-    private Button history;
+
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        ctx = this;
-        mSensorService = new StepCounter(getCtx());
-        mServiceIntent = new Intent(getCtx(),mSensorService.getClass());
 
+        super.onCreate(savedInstanceState);
+
+        ctx = this;//set context
+        //Check if service is running (should only occur on first time setup)
+        StepCounter mSensorService = new StepCounter(getCtx());
+        mServiceIntent = new Intent(getCtx(),mSensorService.getClass());
         if(!isMyServiceRunning(mSensorService.getClass()))
         {
             startService(mServiceIntent);
         }
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);//set binding
+        //setting buttons
+        Button yesterday;
         yesterday = (Button)findViewById(R.id.button5);
         yesterday.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
@@ -62,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
+        Button history;
         history = (Button)findViewById(R.id.button7);
         history.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
@@ -71,8 +76,22 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+
         Log.i("BACTIVE INFO:", "onCreate called in mainActivity");
 
+        //Setting application wide data
+        SharedPreferences prefs = this.getSharedPreferences(
+            "org.swanseacharm.bactive", Context.MODE_PRIVATE);
+        Util util = new Util();
+
+        prefs.edit().putInt("STEPS_PER_CAL",20).apply();
+        util.putDouble(prefs.edit(),"METERS_PER_STEP",0.701).apply();
+
+        //getting application wide data
+
+        mStepsPerCal = prefs.getInt("STEPS_PER_CAL",20);
+        mMetersPerStep = util.getDouble(prefs,"METERS_PER_STEP",0.701);
     }
 
     @Override

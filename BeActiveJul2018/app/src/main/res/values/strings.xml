@@ -7,7 +7,7 @@
     <string name="temp_text">Temp Text</string>
     <string name="factor1">Steps</string>
     <string name="factor2">Calories</string>
-    <string name="factor3">Distance</string>
+    <string name="factor3">Distance(KM)</string>
     <string name="yesterday">Yesterday</string>
     <string name="history">History</string>
     <string name="key">Key</string>

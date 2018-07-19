@@ -31,6 +31,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class History extends AppCompatActivity {
 
@@ -56,7 +58,9 @@ public class History extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_history);
         setStartOfThisWeek();
-        graph = (GraphView) findViewById(R.id.graph);
+        graph = findViewById(R.id.graph);
+        updateGraph();
+
 
         home = (Button)findViewById(R.id.button6);
         home.setOnClickListener(new View.OnClickListener(){
@@ -163,9 +167,16 @@ public class History extends AppCompatActivity {
     {
         Log.i(tag,"setStartOfThisWeek() called");
         firstDayOfWeek = Calendar.getInstance(TimeZone.getTimeZone("GB"), Locale.UK);
-        firstDayOfWeek.set(Calendar.DATE,firstDayOfWeek.getFirstDayOfWeek());
+        firstDayOfWeek.setTimeInMillis(System.currentTimeMillis());
+        firstDayOfWeek.setFirstDayOfWeek(Calendar.MONDAY);
+        firstDayOfWeek.set(Calendar.DAY_OF_WEEK,firstDayOfWeek.getActualMaximum(Calendar.DAY_OF_WEEK)+2);
+
         thisWeekStart = Calendar.getInstance(TimeZone.getTimeZone("GB"), Locale.UK);
-        thisWeekStart.set(Calendar.DATE,thisWeekStart.getFirstDayOfWeek());
+        thisWeekStart.setTimeInMillis(System.currentTimeMillis());
+        thisWeekStart.setFirstDayOfWeek(Calendar.MONDAY);
+        thisWeekStart.set(Calendar.DAY_OF_WEEK,thisWeekStart.getActualMaximum(Calendar.DAY_OF_WEEK)+2);
+        binding.imageButton2.setVisibility(View.GONE);
+        Log.d(tag,""+firstDayOfWeek.getTime()+" "+thisWeekStart.getTime());
     }
 
     private Date endOfThisWeek()//gets the end of the current week
@@ -215,61 +226,90 @@ public class History extends AppCompatActivity {
 
     private ArrayList<Integer> getWeekSteps()
     {
-        String fileStr = getFileFull(getBaseContext());
-        ArrayList<String> stringArrayList = new ArrayList<String>();
+        String fileStr = getFileFull(getBaseContext());//gets file holding dates and steps
+        ArrayList<String> stringArrayList = new ArrayList<>();
         stringArrayList.addAll(Arrays.asList(fileStr.split(seperator)));
-        ArrayList<Integer> week = new ArrayList<Integer>();
+        ArrayList<Integer> week = new ArrayList<>();
         for(int i=0;i<=6;i++)
         {
             week.add(0);
         }
         ArrayList<String> weekDays = getFullWeekDates();
+
+        Log.d(tag,weekDays.get(0)+weekDays.get(6)+"");
+        String regex1 = ".*"+weekDays.get(0)+"";
+        String regex2 = ".*"+weekDays.get(1)+"";
+        String regex3 = ".*"+weekDays.get(2)+"";
+        String regex4 = ".*"+weekDays.get(3)+"";
+        String regex5 = ".*"+weekDays.get(4)+"";
+        String regex6 = ".*"+weekDays.get(5)+"";
+        String regex7 = ".*"+weekDays.get(6)+"";
+        Pattern pattern;
+        Matcher matcher;
+
         for(String str:stringArrayList)
         {
+            //Log.d(tag,"checking matches");
             if(isAllNull(weekDays))
             {
                 break;
             }
-
-            if(str.matches((""+weekDays.get(0)+"$")))
+            pattern = Pattern.compile(regex1);
+            matcher = pattern.matcher(str);
+            if(matcher.matches())
             {
                 ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
                 week.set(0,Integer.valueOf(holder.get(0)));
                 weekDays.set(0,null);
             }
-            else if(str.matches((""+weekDays.get(1)+"$")))
+            pattern = Pattern.compile(regex2);
+            matcher = pattern.matcher(str);
+            if(matcher.matches())
             {
                 ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
                 week.set(1,Integer.valueOf(holder.get(0)));
                 weekDays.set(1,null);
             }
-            else if(str.matches((""+weekDays.get(2)+"$")))
+            pattern = Pattern.compile(regex3);
+            matcher = pattern.matcher(str);
+            if(matcher.matches())
             {
-                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                Log.d(tag,"Weds MATCH");
+                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
                 week.set(2,Integer.valueOf(holder.get(0)));
                 weekDays.set(2,null);
             }
-            else if(str.matches((""+weekDays.get(3)+"$")))
+            pattern = Pattern.compile(regex4);
+            matcher = pattern.matcher(str);
+            if(matcher.matches())
             {
-                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                Log.d(tag,"Thu MATCH");
+                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
                 week.set(3,Integer.valueOf(holder.get(0)));
                 weekDays.set(3,null);
             }
-            else if(str.matches((""+weekDays.get(4)+"$")))
+            pattern = Pattern.compile(regex5);
+            matcher = pattern.matcher(str);
+            if(matcher.matches())
             {
-                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                Log.d(tag,"Fri MATCH");
+                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
                 week.set(4,Integer.valueOf(holder.get(0)));
                 weekDays.set(4,null);
             }
-            else if(str.matches((""+weekDays.get(5)+"$")))
+            pattern = Pattern.compile(regex6);
+            matcher = pattern.matcher(str);
+            if(matcher.matches())
             {
-                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
                 week.set(5,Integer.valueOf(holder.get(0)));
                 weekDays.set(5,null);
             }
-            else if(str.matches((""+weekDays.get(6)+"$")))
+            pattern = Pattern.compile(regex7);
+            matcher = pattern.matcher(str);
+            if(matcher.matches())
             {
-                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
                 week.set(6,Integer.valueOf(holder.get(0)));
                 weekDays.set(6,null);
             }

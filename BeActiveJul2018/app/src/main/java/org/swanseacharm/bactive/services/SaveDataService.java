@@ -50,6 +50,7 @@ public class SaveDataService extends Service {
                 updateFile();
                 Log.i(tag,"Fresh data received");
                 stopSelf();
+
             }
         };
         this.registerReceiver(receiver,intentFilter);
@@ -72,7 +73,7 @@ public class SaveDataService extends Service {
     @Override
     public void onDestroy()
     {
-        this.unregisterReceiver(receiver);
+
         super.onDestroy();
     }
 
@@ -94,7 +95,7 @@ public class SaveDataService extends Service {
         }
 
         Log.i(tag,"File updated");
-
+        this.unregisterReceiver(receiver);
     }
 
     private String getFileFull(Context context)

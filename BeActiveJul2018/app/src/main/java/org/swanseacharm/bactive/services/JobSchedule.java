@@ -15,11 +15,11 @@ public class JobSchedule {
         Calendar calendar = Calendar.getInstance();
         Calendar futureCalender = Calendar.getInstance();
         futureCalender.setTimeInMillis(System.currentTimeMillis());
-        /*futureCalender.add(Calendar.DATE,+0);//Tomorrow
-        futureCalender.set(Calendar.HOUR_OF_DAY,13);//11PM
-        futureCalender.set(Calendar.MINUTE,15);//11:58PM
-        futureCalender.set(Calendar.SECOND,0);//11:58:00PM*/
-        futureCalender.add(Calendar.MINUTE,+1);
+        futureCalender.add(Calendar.DATE,+1);//Tomorrow
+        futureCalender.set(Calendar.HOUR_OF_DAY,23);//11PM
+        futureCalender.set(Calendar.MINUTE,58);//11:58PM
+        futureCalender.set(Calendar.SECOND,0);//11:58:00PM
+
         calendar.setTimeInMillis(System.currentTimeMillis());
 
         //build job

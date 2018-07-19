@@ -12,6 +12,7 @@ import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.TimeUtils;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 public class StepCounter extends Service {
 
@@ -123,9 +125,14 @@ public class StepCounter extends Service {
                 if(intent.getBooleanExtra("COMMAND_RESTART_SERVICE",false))
                 {
                     stepsSince12 = 0;
-                    oldSteps = 0;
                     mSensorManager.unregisterListener(mSensorEventListener,mStepSensor);
-
+                    try {
+                        TimeUnit.MINUTES.sleep(2);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        Log.e(tag,e.toString());
+                    }
                     stopSelf();
                 }
             }
