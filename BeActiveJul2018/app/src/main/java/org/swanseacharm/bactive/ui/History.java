@@ -258,7 +258,7 @@ public class History extends AppCompatActivity {
             matcher = pattern.matcher(str);
             if(matcher.matches())
             {
-                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
                 week.set(0,Integer.valueOf(holder.get(0)));
                 weekDays.set(0,null);
             }
@@ -266,7 +266,7 @@ public class History extends AppCompatActivity {
             matcher = pattern.matcher(str);
             if(matcher.matches())
             {
-                ArrayList<String> holder = (ArrayList<String>)Arrays.asList(str.split(deliminator));
+                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
                 week.set(1,Integer.valueOf(holder.get(0)));
                 weekDays.set(1,null);
             }
