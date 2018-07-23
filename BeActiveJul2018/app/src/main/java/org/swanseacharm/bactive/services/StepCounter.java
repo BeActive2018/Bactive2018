@@ -125,15 +125,6 @@ public class StepCounter extends Service {
                 if(intent.getBooleanExtra("COMMAND_RESTART_SERVICE",false))
                 {
                     stepsSince12 = 0;
-                    mSensorManager.unregisterListener(mSensorEventListener,mStepSensor);
-                    try {
-                        TimeUnit.MINUTES.sleep(2);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        Log.e(tag,e.toString());
-                    }
-                    stopSelf();
                 }
             }
         };

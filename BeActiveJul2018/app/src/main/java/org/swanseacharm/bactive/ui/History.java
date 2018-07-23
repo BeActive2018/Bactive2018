@@ -12,6 +12,7 @@ import android.widget.ImageButton;
 
 import org.swanseacharm.bactive.R;
 import org.swanseacharm.bactive.databinding.ActivityHistoryBinding;
+import org.swanseacharm.bactive.ui.DateAsXValue;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -28,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -109,19 +111,71 @@ public class History extends AppCompatActivity {
 
     private void updateGraph()
     {
+        //set dates to use
+        Date d1 = firstDayOfWeek.getTime();
+        firstDayOfWeek.add(Calendar.DATE,+1);
+        Date d2 = firstDayOfWeek.getTime();
+        firstDayOfWeek.add(Calendar.DATE,+1);
+        Date d3 = firstDayOfWeek.getTime();
+        firstDayOfWeek.add(Calendar.DATE,+1);
+        Date d4 = firstDayOfWeek.getTime();
+        firstDayOfWeek.add(Calendar.DATE,+1);
+        Date d5 = firstDayOfWeek.getTime();
+        firstDayOfWeek.add(Calendar.DATE,+1);
+        Date d6 = firstDayOfWeek.getTime();
+        firstDayOfWeek.add(Calendar.DATE,+1);
+        Date d7 = firstDayOfWeek.getTime();
+        firstDayOfWeek.add(Calendar.DATE,-6);//setting firstDayOfWeek back to the start of the week
+
 
         graph.removeAllSeries();
         ArrayList<Integer> weekSteps = getWeekSteps();
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
-                new DataPoint(0, weekSteps.get(0)),
-                new DataPoint(1, weekSteps.get(1)),
-                new DataPoint(2, weekSteps.get(2)),
-                new DataPoint(3, weekSteps.get(3)),
-                new DataPoint(4, weekSteps.get(4)),
-                new DataPoint(5,weekSteps.get(5)),
-                new DataPoint(6,weekSteps.get(6))
+                new DataPoint(d1, weekSteps.get(0)),
+                new DataPoint(d2, weekSteps.get(1)),
+                new DataPoint(d3, weekSteps.get(2)),
+                new DataPoint(d4, weekSteps.get(3)),
+                new DataPoint(d5, weekSteps.get(4)),
+                new DataPoint(d6,weekSteps.get(5)),
+                new DataPoint(d7,weekSteps.get(6))
         });
         graph.addSeries(series);
+
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setYAxisBoundsManual(true);
+
+        graph.getGridLabelRenderer().setHorizontalLabelsAngle(135);
+
+        // set date label formatter
+        graph.getGridLabelRenderer().setLabelFormatter(new DateAsXValue());
+        graph.getGridLabelRenderer().setNumHorizontalLabels(7);
+        graph.getGridLabelRenderer().setNumVerticalLabels(5);
+
+        // set manual x bounds to have nice steps
+        graph.getViewport().setMinX(d1.getTime());
+        graph.getViewport().setMaxX(d7.getTime());
+        if(Collections.max(weekSteps)<20000) {
+            graph.getViewport().setMinY(0);
+            graph.getViewport().setMaxY(20000);
+        }
+        else if (Collections.max(weekSteps)<30000){
+            graph.getViewport().setMinY(0);
+            graph.getViewport().setMaxY(30000);
+        }
+        else if (Collections.max(weekSteps)<40000){
+            graph.getViewport().setMinY(0);
+            graph.getViewport().setMaxY(40000);
+        }
+        else if (Collections.max(weekSteps)<50000){
+            graph.getViewport().setMinY(0);
+            graph.getViewport().setMaxY(50000);
+        }
+
+
+
+        // as we use dates as labels, the human rounding to nice readable numbers
+        // is not necessary
+        graph.getGridLabelRenderer().setHumanRounding(false);
     }
 
     private String getDateString(Date calender)//converts a single Date object into a string
@@ -258,7 +312,8 @@ public class History extends AppCompatActivity {
             matcher = pattern.matcher(str);
             if(matcher.matches())
             {
-                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
+                ArrayList<String> holder = new ArrayList<>();
+                holder.addAll(Arrays.asList(str.split(deliminator)));
                 week.set(0,Integer.valueOf(holder.get(0)));
                 weekDays.set(0,null);
             }
@@ -266,7 +321,8 @@ public class History extends AppCompatActivity {
             matcher = pattern.matcher(str);
             if(matcher.matches())
             {
-                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
+                ArrayList<String> holder = new ArrayList<>();
+                holder.addAll(Arrays.asList(str.split(deliminator)));
                 week.set(1,Integer.valueOf(holder.get(0)));
                 weekDays.set(1,null);
             }
@@ -275,7 +331,8 @@ public class History extends AppCompatActivity {
             if(matcher.matches())
             {
                 Log.d(tag,"Weds MATCH");
-                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
+                ArrayList<String> holder = new ArrayList<>();
+                holder.addAll(Arrays.asList(str.split(deliminator)));
                 week.set(2,Integer.valueOf(holder.get(0)));
                 weekDays.set(2,null);
             }
@@ -284,7 +341,8 @@ public class History extends AppCompatActivity {
             if(matcher.matches())
             {
                 Log.d(tag,"Thu MATCH");
-                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
+                ArrayList<String> holder = new ArrayList<>();
+                holder.addAll(Arrays.asList(str.split(deliminator)));
                 week.set(3,Integer.valueOf(holder.get(0)));
                 weekDays.set(3,null);
             }
@@ -293,7 +351,8 @@ public class History extends AppCompatActivity {
             if(matcher.matches())
             {
                 Log.d(tag,"Fri MATCH");
-                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
+                ArrayList<String> holder = new ArrayList<>();
+                holder.addAll(Arrays.asList(str.split(deliminator)));
                 week.set(4,Integer.valueOf(holder.get(0)));
                 weekDays.set(4,null);
             }
@@ -301,7 +360,8 @@ public class History extends AppCompatActivity {
             matcher = pattern.matcher(str);
             if(matcher.matches())
             {
-                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
+                ArrayList<String> holder = new ArrayList<>();
+                holder.addAll(Arrays.asList(str.split(deliminator)));
                 week.set(5,Integer.valueOf(holder.get(0)));
                 weekDays.set(5,null);
             }
@@ -309,7 +369,8 @@ public class History extends AppCompatActivity {
             matcher = pattern.matcher(str);
             if(matcher.matches())
             {
-                ArrayList<String> holder = new ArrayList<>(Arrays.asList(str.split(deliminator)));
+                ArrayList<String> holder = new ArrayList<>();
+                holder.addAll(Arrays.asList(str.split(deliminator)));
                 week.set(6,Integer.valueOf(holder.get(0)));
                 weekDays.set(6,null);
             }
