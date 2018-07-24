@@ -14,6 +14,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.TimeUtils;
 
+import org.swanseacharm.bactive.Util;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,9 +43,9 @@ public class StepCounter extends Service {
         public void onSensorChanged(SensorEvent sensorEvent) {//called when sensor has new data
             stepsSince12 += sensorEvent.values[0]-oldSteps;//set the steps to new value
             oldSteps=(int)sensorEvent.values[0];
-            Log.i(tag, "onSensorChanged");
-            Log.d(tag,"event value = "+sensorEvent.values[0]);
-            sendFreshData();//broadcast new data for rest of application
+            //Log.i(tag, "onSensorChanged");
+            //Log.d(tag,"event value = "+sensorEvent.values[0]);
+            //sendFreshData();//broadcast new data for rest of application
 
         }
 
@@ -125,6 +127,14 @@ public class StepCounter extends Service {
                 if(intent.getBooleanExtra("COMMAND_RESTART_SERVICE",false))
                 {
                     stepsSince12 = 0;
+                    try{
+                        this.wait(100);
+                    }
+                    catch (InterruptedException e)
+                    {
+                        Log.e(tag,e.toString());
+                    }
+                    sendFreshData();
                 }
             }
         };
@@ -140,6 +150,10 @@ public class StepCounter extends Service {
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mStepSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         mSensorManager.registerListener(mSensorEventListener,mStepSensor,SensorManager.SENSOR_DELAY_NORMAL);
+        if(intent==null)
+        {
+            intent = new Intent("filler");
+        }
         if(!String.valueOf(intent.getIntExtra("DATA_STEPS_SINCE_TWELVE",0)).equals(""))
         {
             stepsSince12 = intent.getIntExtra("DATA_STEPS_SINCE_TWELVE",0);
@@ -160,7 +174,6 @@ public class StepCounter extends Service {
             mBooted=false;
         }
 
-
         return Service.START_STICKY;
     }
 
@@ -180,43 +193,11 @@ public class StepCounter extends Service {
         this.unregisterReceiver(mSaveDataReceiver);
     }
 
-
-
-
     public String getfile(Context context)
     {
-        String ret = "";
-        try{
-            InputStream inputStream = context.openFileInput(fileName);
-
-            if(inputStream!=null)
-            {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String recieveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ((recieveString = bufferedReader.readLine())!=null)
-                {
-                    stringBuilder.append(recieveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch(FileNotFoundException e){
-            Log.e(tag, e.toString());
-        }
-        catch (IOException e){
-            Log.e(tag, e.toString());
-        }
-
-        return ret;
+        Util util = new Util();
+        return util.getfile(context);
     }
-
-
-
 
     @Nullable
     @Override

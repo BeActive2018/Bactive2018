@@ -11,27 +11,21 @@ import android.widget.Button;
 import android.widget.ImageButton;
 
 import org.swanseacharm.bactive.R;
+import org.swanseacharm.bactive.Util;
 import org.swanseacharm.bactive.databinding.ActivityHistoryBinding;
-import org.swanseacharm.bactive.ui.DateAsXValue;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Stack;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,6 +39,7 @@ public class History extends AppCompatActivity {
 
     private Calendar firstDayOfWeek;
     private Calendar thisWeekStart;
+    private Stack<ArrayList<Integer>> weekStack = new Stack<>();
 
     private Button home;
     private Button yesterday;
@@ -61,7 +56,7 @@ public class History extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this,R.layout.activity_history);
         setStartOfThisWeek();
         graph = findViewById(R.id.graph);
-        updateGraph();
+        updateGraph(false);
 
 
         home = (Button)findViewById(R.id.button6);
@@ -85,7 +80,7 @@ public class History extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 nextWeek();
-                updateGraph();
+                updateGraph(true);
             }
         }
     );
@@ -95,7 +90,7 @@ public class History extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 lastWeek();
-                updateGraph();
+                updateGraph(false);
             }
         });
 
@@ -109,8 +104,10 @@ public class History extends AppCompatActivity {
         overridePendingTransition(0,0);
     }
 
-    private void updateGraph()
+    private void updateGraph(boolean nextWeek)
     {
+        int maxStep = 0;
+        DataPoint[] data=null;
         //set dates to use
         Date d1 = firstDayOfWeek.getTime();
         firstDayOfWeek.add(Calendar.DATE,+1);
@@ -127,19 +124,43 @@ public class History extends AppCompatActivity {
         Date d7 = firstDayOfWeek.getTime();
         firstDayOfWeek.add(Calendar.DATE,-6);//setting firstDayOfWeek back to the start of the week
 
+        //if next week selected (forward in time) and stack has data then get weeks data from the stack
+        if(nextWeek && !weekStack.empty())
+        {
+            weekStack.pop();
+            ArrayList<Integer> weekSteps = weekStack.pop();
+            data = new DataPoint[] {
+                    new DataPoint(d1, weekSteps.get(0)),
+                    new DataPoint(d2, weekSteps.get(1)),
+                    new DataPoint(d3, weekSteps.get(2)),
+                    new DataPoint(d4, weekSteps.get(3)),
+                    new DataPoint(d5, weekSteps.get(4)),
+                    new DataPoint(d6,weekSteps.get(5)),
+                    new DataPoint(d7,weekSteps.get(6))
+            };
+            weekStack.push(weekSteps);
+        }
+        //otherwise retrieve data from disk
+        else
+        {
+            ArrayList<Integer> weekSteps = getWeekSteps();
+            data = new DataPoint[] {
+                    new DataPoint(d1, weekSteps.get(0)),
+                    new DataPoint(d2, weekSteps.get(1)),
+                    new DataPoint(d3, weekSteps.get(2)),
+                    new DataPoint(d4, weekSteps.get(3)),
+                    new DataPoint(d5, weekSteps.get(4)),
+                    new DataPoint(d6,weekSteps.get(5)),
+                    new DataPoint(d7,weekSteps.get(6))
+            };
+            weekStack.push(weekSteps);
+        }
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(data);
 
         graph.removeAllSeries();
-        ArrayList<Integer> weekSteps = getWeekSteps();
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
-                new DataPoint(d1, weekSteps.get(0)),
-                new DataPoint(d2, weekSteps.get(1)),
-                new DataPoint(d3, weekSteps.get(2)),
-                new DataPoint(d4, weekSteps.get(3)),
-                new DataPoint(d5, weekSteps.get(4)),
-                new DataPoint(d6,weekSteps.get(5)),
-                new DataPoint(d7,weekSteps.get(6))
-        });
+
         graph.addSeries(series);
+        graph.getGridLabelRenderer().resetStyles();
 
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setYAxisBoundsManual(true);
@@ -154,24 +175,22 @@ public class History extends AppCompatActivity {
         // set manual x bounds to have nice steps
         graph.getViewport().setMinX(d1.getTime());
         graph.getViewport().setMaxX(d7.getTime());
-        if(Collections.max(weekSteps)<20000) {
+        if(maxStep<20000) {
             graph.getViewport().setMinY(0);
             graph.getViewport().setMaxY(20000);
         }
-        else if (Collections.max(weekSteps)<30000){
+        else if (maxStep<32000){
             graph.getViewport().setMinY(0);
-            graph.getViewport().setMaxY(30000);
+            graph.getViewport().setMaxY(32000);
         }
-        else if (Collections.max(weekSteps)<40000){
+        else if (maxStep<40000){
             graph.getViewport().setMinY(0);
             graph.getViewport().setMaxY(40000);
         }
-        else if (Collections.max(weekSteps)<50000){
+        else if (maxStep<64000){
             graph.getViewport().setMinY(0);
-            graph.getViewport().setMaxY(50000);
+            graph.getViewport().setMaxY(64000);
         }
-
-
 
         // as we use dates as labels, the human rounding to nice readable numbers
         // is not necessary
@@ -187,16 +206,16 @@ public class History extends AppCompatActivity {
     private void nextWeek()
     {
 
-        Log.i(tag,"nextWeek() called");
+        Log.d(tag,"nextWeek() called");
         firstDayOfWeek.add(firstDayOfWeek.DATE,+7);
         if(firstDayOfWeek.after(thisWeekStart))
         {
-            Log.i(tag,"week too far ahead");
+            Log.d(tag,"week too far ahead");
             firstDayOfWeek.add(firstDayOfWeek.DATE,-7);
             binding.imageButton2.setVisibility(View.GONE);
         }
-        Log.i(tag,"firstDayOfWeek milli="+getDateString(firstDayOfWeek.getTime()));
-        Log.i(tag,"thisWeekStart milli="+getDateString(thisWeekStart.getTime()));
+        //Log.i(tag,"firstDayOfWeek milli="+getDateString(firstDayOfWeek.getTime()));
+        //Log.i(tag,"thisWeekStart milli="+getDateString(thisWeekStart.getTime()));
         if(getDateString(firstDayOfWeek.getTime()).equals(getDateString(thisWeekStart.getTime())))
         {
             Log.i(tag,"This week selected");
@@ -231,14 +250,6 @@ public class History extends AppCompatActivity {
         thisWeekStart.set(Calendar.DAY_OF_WEEK,thisWeekStart.getActualMaximum(Calendar.DAY_OF_WEEK)+2);
         binding.imageButton2.setVisibility(View.GONE);
         Log.d(tag,""+firstDayOfWeek.getTime()+" "+thisWeekStart.getTime());
-    }
-
-    private Date endOfThisWeek()//gets the end of the current week
-    {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DATE,calendar.getFirstDayOfWeek());
-        calendar.add(Calendar.DATE,+7);
-        return calendar.getTime();
     }
 
     private ArrayList<Date> getWeekPeriod(Calendar startOfPeriodCalender) //calculates every date for the week given a
@@ -330,7 +341,7 @@ public class History extends AppCompatActivity {
             matcher = pattern.matcher(str);
             if(matcher.matches())
             {
-                Log.d(tag,"Weds MATCH");
+                //Log.d(tag,"Weds MATCH");
                 ArrayList<String> holder = new ArrayList<>();
                 holder.addAll(Arrays.asList(str.split(deliminator)));
                 week.set(2,Integer.valueOf(holder.get(0)));
@@ -340,7 +351,7 @@ public class History extends AppCompatActivity {
             matcher = pattern.matcher(str);
             if(matcher.matches())
             {
-                Log.d(tag,"Thu MATCH");
+                //Log.d(tag,"Thu MATCH");
                 ArrayList<String> holder = new ArrayList<>();
                 holder.addAll(Arrays.asList(str.split(deliminator)));
                 week.set(3,Integer.valueOf(holder.get(0)));
@@ -350,7 +361,7 @@ public class History extends AppCompatActivity {
             matcher = pattern.matcher(str);
             if(matcher.matches())
             {
-                Log.d(tag,"Fri MATCH");
+                //Log.d(tag,"Fri MATCH");
                 ArrayList<String> holder = new ArrayList<>();
                 holder.addAll(Arrays.asList(str.split(deliminator)));
                 week.set(4,Integer.valueOf(holder.get(0)));
@@ -388,33 +399,7 @@ public class History extends AppCompatActivity {
 
     private String getFileFull(Context context)
     {
-        String ret = "";
-        try{
-            InputStream inputStream = context.openFileInput(fileName);
-
-            if(inputStream!=null)
-            {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String recieveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ((recieveString = bufferedReader.readLine())!=null)
-                {
-                    stringBuilder.append(recieveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch(FileNotFoundException e){
-            Log.e(tag, e.toString());
-        }
-        catch (IOException e){
-            Log.e(tag, e.toString());
-        }
-
-        return ret;
+        Util util = new Util();
+        return util.getfile(context);
     }
 }
