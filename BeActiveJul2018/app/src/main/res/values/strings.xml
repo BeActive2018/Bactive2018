@@ -11,4 +11,9 @@
     <string name="yesterday">Yesterday</string>
     <string name="history">History</string>
     <string name="key">Key</string>
+    <string name="good">good</string>
+    <string name="great">great</string>
+    <string name="ok">ok</string>
+    <string name="bad">bad</string>
+    <string name="amazing">amazing</string>
 </resources>

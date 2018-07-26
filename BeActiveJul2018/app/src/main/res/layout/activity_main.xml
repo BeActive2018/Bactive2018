@@ -2,6 +2,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -19,7 +20,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView"
-            app:srcCompat="@drawable/g00" />
+            app:srcCompat="@drawable/slowbackground" />
 
         <TextView
             android:id="@+id/textView"
@@ -47,7 +48,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView"
-            app:srcCompat="@drawable/g00" />
+            app:srcCompat="@drawable/slowbackground" />
 
         <TextView
             android:id="@+id/textView2"
@@ -133,7 +134,7 @@
             android:id="@+id/stepsTakenToday"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
-            android:text="99999"
+            android:text="0"
             android:textColor="@android:color/white"
             app:layout_constraintStart_toStartOf="@+id/imageView3"
             app:layout_constraintTop_toTopOf="@+id/textView4" />
@@ -142,7 +143,7 @@
             android:id="@+id/textView9"
             android:layout_width="32dp"
             android:layout_height="19dp"
-            android:text="9999"
+            android:text="0"
             android:textColor="@android:color/white"
             app:layout_constraintStart_toStartOf="@+id/imageView3"
             app:layout_constraintTop_toTopOf="@+id/textView5" />
@@ -151,7 +152,7 @@
             android:id="@+id/textView10"
             android:layout_width="wrap_content"
             android:layout_height="19dp"
-            android:text="999"
+            android:text="0"
             android:textColor="@android:color/white"
             app:layout_constraintStart_toStartOf="@+id/imageView3"
             app:layout_constraintTop_toTopOf="@+id/textView6" />
@@ -160,7 +161,7 @@
             android:id="@+id/textView11"
             android:layout_width="40dp"
             android:layout_height="wrap_content"
-            android:text="99999"
+            android:text="0"
             android:textColor="@android:color/white"
             app:layout_constraintStart_toStartOf="@+id/imageView4"
             app:layout_constraintTop_toTopOf="@+id/stepsTakenToday" />
@@ -169,7 +170,7 @@
             android:id="@+id/textView12"
             android:layout_width="32dp"
             android:layout_height="wrap_content"
-            android:text="9999"
+            android:text="0"
             android:textColor="@android:color/white"
             app:layout_constraintStart_toStartOf="@+id/textView11"
             app:layout_constraintTop_toTopOf="@+id/textView9" />
@@ -178,7 +179,7 @@
             android:id="@+id/textView13"
             android:layout_width="24dp"
             android:layout_height="wrap_content"
-            android:text="999"
+            android:text="0"
             android:textColor="@android:color/white"
             app:layout_constraintStart_toStartOf="@+id/imageView4"
             app:layout_constraintTop_toTopOf="@+id/textView10" />
@@ -219,6 +220,25 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/button5" />
+
+        <ImageView
+            android:id="@+id/imageView5"
+            android:layout_width="42dp"
+            android:layout_height="84dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageView2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/imageView2"
+            app:layout_constraintTop_toTopOf="@+id/imageView2"
+            app:srcCompat="@drawable/greenman" />
+
+        <ImageView
+            android:id="@+id/imageView6"
+            android:layout_width="137dp"
+            android:layout_height="84dp"
+            app:layout_constraintEnd_toStartOf="@+id/imageView"
+            app:layout_constraintStart_toEndOf="@+id/imageView"
+            app:layout_constraintTop_toTopOf="@+id/imageView"
+            app:srcCompat="@drawable/groupwalk" />
 
 
     </android.support.constraint.ConstraintLayout>

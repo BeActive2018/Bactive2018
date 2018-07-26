@@ -5,11 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
+import android.graphics.drawable.AnimationDrawable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import org.swanseacharm.bactive.R;
 import org.swanseacharm.bactive.Util;
@@ -93,6 +96,61 @@ public class Yesterday extends AppCompatActivity {
         binding.stepsTakenToday.setText(String.valueOf(yesterdaySteps));
         binding.textView9.setText(String.valueOf(yesterdaySteps/mStepsPerCal));
         binding.textView10.setText(String.valueOf(Double.valueOf(df.format((yesterdaySteps*mMetersPerStep)/1000))));
+
+        //start green man animation
+        ImageView greenManAnimation = findViewById(R.id.imageView8);
+        AnimationDrawable animation1 = (AnimationDrawable) greenManAnimation.getDrawable();
+        animation1.start();
+        //start group men animation
+        ImageView groupAnimation = findViewById(R.id.imageView7);
+        AnimationDrawable animation2 = (AnimationDrawable) groupAnimation.getDrawable();
+        animation2.start();
+        //start top background animation
+        ImageView background = findViewById(R.id.imageView);
+        AnimationDrawable animation3 = (AnimationDrawable) background.getDrawable();
+        animation3.start();
+        //start bottom background animation
+        ImageView background2 = findViewById(R.id.imageView2);
+        AnimationDrawable animation4 = (AnimationDrawable) background2.getDrawable();
+        animation4.start();
+        //update position of the green man
+        updateGreenManPosition();
+    }
+
+    private void updateGreenManPosition()
+    {
+        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) findViewById(R.id.imageView8).getLayoutParams();
+        //TODO remove and replace with values from database
+        int temporyDevInt =1000;
+        if(yesterdaySteps<=temporyDevInt*0.05)
+        {
+            params.horizontalBias = 0.80f;
+            binding.textView2.setText(R.string.bad);
+        }
+        else if(yesterdaySteps<=temporyDevInt*0.25)
+        {
+            params.horizontalBias = 0.6f;
+            binding.textView2.setText(R.string.ok);
+        }
+        else if(yesterdaySteps<=temporyDevInt)
+        {
+            params.horizontalBias = 0.5f;
+            binding.textView2.setText(R.string.good);
+        }
+        else if(yesterdaySteps<=temporyDevInt*1.25)
+        {
+            params.horizontalBias = 0.4f;
+            binding.textView2.setText(R.string.great);
+        }
+        else
+        {
+            params.horizontalBias = 0.2f;
+            binding.textView2.setText(R.string.amazing);
+        }
+        findViewById(R.id.imageView8).setLayoutParams(params);
+
+
+
     }
 
     private String getFileFull(Context context)

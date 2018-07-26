@@ -127,13 +127,7 @@ public class StepCounter extends Service {
                 if(intent.getBooleanExtra("COMMAND_RESTART_SERVICE",false))
                 {
                     stepsSince12 = 0;
-                    try{
-                        this.wait(100);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        Log.e(tag,e.toString());
-                    }
+
                     sendFreshData();
                 }
             }
