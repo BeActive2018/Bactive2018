@@ -2,6 +2,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
+
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -86,21 +87,29 @@
 
         <ImageButton
             android:id="@+id/imageButton"
-            android:layout_width="171dp"
-            android:layout_height="69dp"
+            android:layout_width="166dp"
+            android:layout_height="159dp"
+            android:layout_marginStart="9dp"
+            android:layout_marginTop="8dp"
+            android:background="@null"
             android:contentDescription="week before"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/graph"
-            app:srcCompat="@drawable/ic_menu_back" />
+            app:srcCompat="@drawable/backchevron" />
 
         <ImageButton
             android:id="@+id/imageButton2"
-            android:layout_width="171dp"
-            android:layout_height="69dp"
+            style="@android:style/Widget.DeviceDefault.Light.ImageButton"
+            android:layout_width="166dp"
+            android:layout_height="159dp"
+            android:layout_marginEnd="9dp"
+            android:layout_marginTop="8dp"
+            android:background="@null"
             android:contentDescription="week after"
+            android:elevation="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/graph"
-            app:srcCompat="@drawable/ic_menu_forward" />
+            app:srcCompat="@drawable/forwardchevron" />
 
 
     </android.support.constraint.ConstraintLayout>
