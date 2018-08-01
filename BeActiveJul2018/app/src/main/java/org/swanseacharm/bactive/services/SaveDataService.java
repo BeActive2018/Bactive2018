@@ -10,6 +10,7 @@ import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.util.Log;
 
+import org.swanseacharm.bactive.Util;
 import org.swanseacharm.bactive.ui.Yesterday;
 
 import java.io.BufferedReader;
@@ -19,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class SaveDataService extends Service {
@@ -81,14 +83,18 @@ public class SaveDataService extends Service {
     {
         try{
             SimpleDateFormat formatterDate = new SimpleDateFormat("yyyyMMdd");
-            Date date = new Date();
+            //Date date = new Date();
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+            calendar.add(Calendar.DATE,+1);
 
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(getBaseContext().openFileOutput(fileName,Context.MODE_APPEND));
-            outputStreamWriter.write(stepsSince12+","+formatterDate.format(date)+"/n");
+            outputStreamWriter.write(stepsSince12+","+formatterDate.format(calendar.getTimeInMillis())+"/n");
             outputStreamWriter.close();
-            Log.d(tag,stepsSince12+","+formatterDate.format(date)+"\n");
+            Log.d(tag,stepsSince12+","+formatterDate.format(calendar.getTimeInMillis())+"/n");
             Log.i(tag,"sent data to file for long storage"+getApplicationContext());
-            getFileFull(getBaseContext());
+            //getFileFull(getBaseContext());
         }
         catch (IOException e){
             Log.e("EXCEPTION", e.toString());
@@ -98,36 +104,4 @@ public class SaveDataService extends Service {
         this.unregisterReceiver(receiver);
     }
 
-    private String getFileFull(Context context)
-    {
-        Log.i(tag, "getting file");
-        String ret = "";
-        try{
-            InputStream inputStream = context.openFileInput(fileName);
-
-            if(inputStream!=null)
-            {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String recieveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ((recieveString = bufferedReader.readLine())!=null)
-                {
-                    stringBuilder.append(recieveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch(FileNotFoundException e){
-            Log.e(tag, e.toString());
-        }
-        catch (IOException e){
-            Log.e(tag, e.toString());
-        }
-        Log.v(tag,ret+" End of file");
-        return ret;
-    }
 }

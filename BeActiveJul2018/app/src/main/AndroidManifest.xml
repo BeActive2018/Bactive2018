@@ -6,7 +6,7 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.alarm.permission.SET_ALARM"/>
+    <uses-permission android:name="android.alarm.permission.SET_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -56,9 +56,14 @@
             android:name=".services.SaveDataService"
             android:enabled="true"
             android:exported="true" />
-
-        <service android:name=".services.JobScheduleService"
+        <service
+            android:name=".services.JobScheduleService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <service
+            android:name=".services.StepTracker"
+            android:enabled="true"
+            android:exported="true"></service>
     </application>
 
 </manifest>

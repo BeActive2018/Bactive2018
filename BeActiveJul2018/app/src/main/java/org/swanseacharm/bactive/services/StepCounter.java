@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class StepCounter extends Service {
 
     private String fileName="stepHistory.stp";
+    private String saveFileName="savedData.stp";
 
     private String lastSave="0";
     private long saveInterval=60000/*3600000*/;//1hour in miliseconds
@@ -72,6 +73,7 @@ public class StepCounter extends Service {
 
     public void sendFreshData()//broadcasts step data
     {
+
         Intent intent = new Intent("org.swanseacharm.bactive.FRESHDATA")
                 .putExtra("DATA_STEPS_TODAY",stepsSince12);
         Log.i(tag,"sendFreshData broadcast "+ stepsSince12);
@@ -82,6 +84,7 @@ public class StepCounter extends Service {
     public void onCreate()
     {
         super.onCreate();
+
         //Recieve if a boot has happened
         IntentFilter intentFilter = new IntentFilter("org.swanseacharm.bactive.services");
         mBootReciever = new BroadcastReceiver() {
@@ -109,6 +112,7 @@ public class StepCounter extends Service {
                     Log.i(tag,"Sending history");
                     sendBroadcast(new Intent("org.swanseacharm.bactive.ui").putExtra("DATA_HISTORY",getfile(getBaseContext())));
                 }
+
             }
         };
         this.registerReceiver(mBootReciever,intentFilter);
@@ -167,6 +171,7 @@ public class StepCounter extends Service {
             oldSteps=0;
             mBooted=false;
         }
+        sendFreshData();
 
         return Service.START_STICKY;
     }
@@ -181,7 +186,8 @@ public class StepCounter extends Service {
                 .putExtra("DATA_OLD_STEPS",oldSteps)
                 .putExtra("DATA_LAST_SAVE",lastSave);
 
-        sendBroadcast(broadcastIntent);
+        sendBroadcast(broadcastIntent); //broadcast to auto restart service
+
         this.unregisterReceiver(mBootReciever);
         this.unregisterReceiver(mMultiReceiver);
         this.unregisterReceiver(mSaveDataReceiver);

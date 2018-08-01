@@ -9,7 +9,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -57,4 +59,59 @@ public class Util {
         return ret;
     }
 
+    public String getfile(Context context,String fName)
+    {
+        String ret = "";
+        try{
+            InputStream inputStream = context.openFileInput(fName);
+
+            if(inputStream!=null)
+            {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String recieveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+
+                while ((recieveString = bufferedReader.readLine())!=null)
+                {
+                    stringBuilder.append(recieveString);
+                }
+
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch(FileNotFoundException e){
+            Log.e(tag, e.toString());
+        }
+        catch (IOException e){
+            Log.e(tag, e.toString());
+        }
+
+        return ret;
+    }
+
+    public void saveDataToFile(Context context,String fName,String data,boolean append)
+    {
+        try{
+            OutputStreamWriter outputStreamWriter;
+            if(append){
+                outputStreamWriter = new OutputStreamWriter(context.openFileOutput(fName,Context.MODE_APPEND));
+            }
+            else
+            {
+                outputStreamWriter = new OutputStreamWriter(context.openFileOutput(fName,Context.MODE_PRIVATE));
+            }
+            outputStreamWriter.write(data);
+            outputStreamWriter.close();
+            Log.i(tag,"Data saved to "+fName);
+
+        }
+        catch (IOException e){
+            Log.e("EXCEPTION", e.toString());
+        }
+    }
+
 }
+
+
