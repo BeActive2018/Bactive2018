@@ -1,6 +1,5 @@
 package org.swanseacharm.bactive.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,7 +16,6 @@ import android.widget.ImageView;
 import org.swanseacharm.bactive.R;
 import org.swanseacharm.bactive.Util;
 import org.swanseacharm.bactive.databinding.ActivityYesterdayBinding;
-import org.swanseacharm.bactive.services.SaveDataService;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -30,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,11 +37,11 @@ public class Yesterday extends AppCompatActivity {
     //configuration variables
     private String tag = "Yesterday_Activity";
     private String fileName = "stepHistory.stp";
-    private String deliminator = ",";
-    private String seperator = "/n";
+    private String deliminator = ",";//separator for date and respective steps
+    private String seperator = "/n";//separator for date step pairs
 
-    private int mStepsPerCal = 20;
-    private double mMetersPerStep = 0.701;
+    private int mStepsPerCal = 20; //how many steps need to be taken to burn 1 calorie
+    private double mMetersPerStep = 0.701;//distance travelled in 1 step (meters)
     //data binding variable and buttons
     ActivityYesterdayBinding binding;
     private Button home;
@@ -50,17 +49,12 @@ public class Yesterday extends AppCompatActivity {
     //steps taken yesterday (determined in onCreate()
     private int yesterdaySteps = 0;
 
-
-    public void Yesterday()
-    {
-
-    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.i(tag,"onCreate called");
+        Log.d(tag,"onCreate called");
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_yesterday);
-        yesterdaySteps = getYesterdaySteps();
+        yesterdaySteps = getYesterdaySteps();//get steps for yesterday
 
         home = (Button)findViewById(R.id.button6);
         home.setOnClickListener(new View.OnClickListener(){
@@ -91,8 +85,9 @@ public class Yesterday extends AppCompatActivity {
     public void onStart()
     {
         super.onStart();
-        DecimalFormat df = new DecimalFormat("#.##");
+        DecimalFormat df = new DecimalFormat("#.##");//format for distance travelled
 
+        //set UI elements to correct values
         binding.stepsTakenToday.setText(String.valueOf(yesterdaySteps));
         binding.textView9.setText(String.valueOf(yesterdaySteps/mStepsPerCal));
         binding.textView10.setText(String.valueOf(Double.valueOf(df.format((yesterdaySteps*mMetersPerStep)/1000))));
@@ -117,11 +112,11 @@ public class Yesterday extends AppCompatActivity {
         updateGreenManPosition();
     }
 
-    private void updateGreenManPosition()
+    private void updateGreenManPosition()//changes green characters position depending on performance compared to group average
     {
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) findViewById(R.id.imageView8).getLayoutParams();
         //TODO remove and replace with values from database
-        int temporyDevInt =1000;
+        int temporyDevInt =10000;
         if(yesterdaySteps<=temporyDevInt*0.05)
         {
             params.horizontalBias = 0.80f;
@@ -155,69 +150,43 @@ public class Yesterday extends AppCompatActivity {
 
     private String getFileFull(Context context)
     {
-        Log.i(tag, "getting file");
-        String ret = "";
-        try{
-            InputStream inputStream = context.openFileInput(fileName);
-
-            if(inputStream!=null)
-            {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String recieveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ((recieveString = bufferedReader.readLine())!=null)
-                {
-                    stringBuilder.append(recieveString);
-                }
-
-                inputStream.close();
-                ret = stringBuilder.toString();
-            }
-        }
-        catch(FileNotFoundException e){
-            Log.e(tag, e.toString());
-        }
-        catch (IOException e){
-            Log.e(tag, e.toString());
-        }
-        Log.v(tag,ret+" End of file");
-        return ret;
+        Util util = new Util();
+        return util.getfile(context);
     }
 
-    private String getYesterdayString()
+    private String getYesterdayString()//converts a date from yesterday() into correct string date format
     {
-        SimpleDateFormat formatterDate = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat formatterDate = new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH);
         Log.d(tag,formatterDate.format(yesterday()));
         return formatterDate.format(yesterday());
 
     }
-    private Date yesterday()
+    private Date yesterday()//returns yesterdays date as Date object
     {
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DATE,-1);
         return calendar.getTime();
     }
-    private int getYesterdaySteps()
+    private int getYesterdaySteps()//gets steps taken yesterday
     {
-        String fileStr = getFileFull(this.getApplication());
+        String fileStr = getFileFull(this.getApplication());//get history file
         ArrayList<String> stringArrayList = new ArrayList<>();
-        stringArrayList.addAll(Arrays.asList(fileStr.split(seperator)));
-        String regex = ".*"+getYesterdayString()+"";
+        stringArrayList.addAll(Arrays.asList(fileStr.split(seperator)));//split file for parsing
+        String regex = ".*"+getYesterdayString()+"";//setup regex string
         Pattern pattern;
         Matcher matcher;
         pattern = Pattern.compile(regex);
 
-        for(String str:stringArrayList)
+        for(String str:stringArrayList)//for every string in stringArrayList
         {
             matcher = pattern.matcher(str);
             Log.d(tag,"the outer loop"+str+" "+getYesterdayString());
+            //if str has yesterdays date
             if(matcher.matches())
             {
                 Log.d(tag,"the inner loop"+getYesterdayString());
-                stringArrayList = new ArrayList<>(Arrays.asList(str.split(deliminator)));
-                return Integer.valueOf(stringArrayList.get(0));
+                stringArrayList = new ArrayList<>(Arrays.asList(str.split(deliminator)));//split date and steps
+                return Integer.valueOf(stringArrayList.get(0));//return steps as integer
             }
         }
         return 0;
@@ -227,6 +196,7 @@ public class Yesterday extends AppCompatActivity {
     public void onPause()
     {
         super.onPause();
-        overridePendingTransition(0,0);
+        overridePendingTransition(0,0);//remove animation
     }
+    //TODO get database information and put it into group average
 }

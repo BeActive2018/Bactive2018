@@ -30,17 +30,12 @@ public class MainActivity extends AppCompatActivity {
     ActivityMainBinding binding;
 
 
-    private int mStepsPerCal = 20;
-    private double mMetersPerStep = 0.701;
+    private int mStepsPerCal = 20;//steps per calorie burned
+    private double mMetersPerStep = 0.701;//distance per step (meters)
 
     private Intent mServiceIntent;
-    private Context ctx;
     private String tag = "MAINACTIVITY";
     private int todaySteps=0;
-
-    public Context getCtx() {
-        return ctx;
-    }
 
     private BroadcastReceiver receiver;
 
@@ -52,10 +47,9 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
 
-        ctx = this;//set context
         //Check if service is running (should only occur on first time setup)
-        StepCounter mSensorService = new StepCounter(getCtx());
-        mServiceIntent = new Intent(getCtx(),mSensorService.getClass());
+        StepCounter mSensorService = new StepCounter();
+        mServiceIntent = new Intent(this.getApplicationContext(),mSensorService.getClass());
         if(!isMyServiceRunning(mSensorService.getClass()))
         {
             startService(mServiceIntent);
@@ -83,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        Log.i("BACTIVE INFO:", "onCreate called in mainActivity");
+        Log.i("BACTIVE INFO:", "Bactive Activity app started");
 
         //Setting application wide data
         SharedPreferences prefs = this.getSharedPreferences(
@@ -129,35 +123,35 @@ public class MainActivity extends AppCompatActivity {
     public void onResume()
     {
         super.onResume();
-        IntentFilter intentFilter = new IntentFilter("org.swanseacharm.bactive.FRESHDATA");
+        IntentFilter intentFilter = new IntentFilter("org.swanseacharm.bactive.FRESHDATA");//receives step count data from StepCounter.class
         receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            DecimalFormat df = new DecimalFormat("#.##");
-            todaySteps = intent.getIntExtra("DATA_STEPS_TODAY",0);
-            long totSteps = intent.getLongExtra("DATA_STEP_TOTAL",0);
+            DecimalFormat df = new DecimalFormat("#.##");//format for distance travelled
+            todaySteps = intent.getIntExtra("DATA_STEPS_TODAY",0);//get today's steps
+            //set view objects to values
             binding.stepsTakenToday.setText(String.valueOf(todaySteps));
             binding.textView9.setText(String.valueOf(todaySteps/mStepsPerCal));
             binding.textView10.setText(String.valueOf(Double.valueOf(df.format((todaySteps*mMetersPerStep)/1000))));
-            Log.i("Main activity", "broadcast recieved");
-            updateGreenManPosition();
+            Log.d("Main activity", "broadcast recieved");
+            updateGreenManPosition();//update position of green character
         }
     };
         this.registerReceiver(this.receiver,intentFilter);
 
         Intent intent = new Intent("org.swanseacharm.bactive.services")
                 .putExtra("REQUEST_FRESH_DATA",true);
-        sendBroadcast(intent);
+        sendBroadcast(intent);//request fresh step data
 
 
 
     }
 
-    private void updateGreenManPosition()
+    private void updateGreenManPosition()//update position of green man depending on steps compared to group average
     {
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) findViewById(R.id.imageView5).getLayoutParams();
         //TODO remove and replace with values from database
-        int temporyDevInt =1000;
+        int temporyDevInt =10000;
         if(todaySteps<=temporyDevInt*0.05)
         {
             params.horizontalBias = 0.80f;
@@ -207,11 +201,11 @@ public class MainActivity extends AppCompatActivity {
     public void onDestroy()
     {
         super.onDestroy();
-        stopService(mServiceIntent);
-        Log.i(tag,"Stopping service");
+        stopService(mServiceIntent);//stop StepCounter service so it doesn't die with the thread
+        Log.d(tag,"Stopping service");
     }
 
-    private boolean isMyServiceRunning(Class<?> serviceClass)
+    private boolean isMyServiceRunning(Class<?> serviceClass)//checks if service is already running
     {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
@@ -226,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
+//TODO get database information and put it into group average
 }
 
 

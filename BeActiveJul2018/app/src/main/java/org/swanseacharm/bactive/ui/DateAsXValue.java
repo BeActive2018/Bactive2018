@@ -1,13 +1,10 @@
 package org.swanseacharm.bactive.ui;
 
-import android.content.Context;
-
 import com.jjoe64.graphview.DefaultLabelFormatter;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Locale;
 
 public class DateAsXValue extends DefaultLabelFormatter {
 
@@ -15,12 +12,12 @@ public class DateAsXValue extends DefaultLabelFormatter {
      * the date format that will convert
      * the unix timestamp to string
      */
-    protected final SimpleDateFormat mDateFormat = new SimpleDateFormat("dd/MM");;
+    private final SimpleDateFormat mDateFormat = new SimpleDateFormat("dd/MM", Locale.ENGLISH);
 
     /**
      * calendar to avoid creating new date objects
      */
-    protected final Calendar mCalendar = Calendar.getInstance();;
+    private final Calendar mCalendar = Calendar.getInstance();;
 
     /**
      * formats the x-values as date string.

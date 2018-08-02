@@ -60,10 +60,6 @@
             android:name=".services.JobScheduleService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <service
-            android:name=".services.StepTracker"
-            android:enabled="true"
-            android:exported="true"></service>
     </application>
 
 </manifest>
