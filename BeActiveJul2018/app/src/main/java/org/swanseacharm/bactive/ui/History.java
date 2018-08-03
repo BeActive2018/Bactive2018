@@ -3,6 +3,7 @@ package org.swanseacharm.bactive.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -94,6 +95,8 @@ public class History extends AppCompatActivity {
             }
         });
 
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.bactivelogo);
 
     }
 
@@ -177,6 +180,9 @@ public class History extends AppCompatActivity {
         graph.getGridLabelRenderer().setLabelFormatter(new DateAsXValue());
         graph.getGridLabelRenderer().setNumHorizontalLabels(7);
         graph.getGridLabelRenderer().setNumVerticalLabels(5);
+
+        graph.getGridLabelRenderer().setHorizontalLabelsColor(Color.WHITE);
+        graph.getGridLabelRenderer().setVerticalLabelsColor(Color.WHITE);
 
         // set manual x bounds to have nice steps
         graph.getViewport().setMinX(d1.getTime());

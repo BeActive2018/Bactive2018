@@ -36,7 +36,6 @@ public class Yesterday extends AppCompatActivity {
 
     //configuration variables
     private String tag = "Yesterday_Activity";
-    private String fileName = "stepHistory.stp";
     private String deliminator = ",";//separator for date and respective steps
     private String seperator = "/n";//separator for date step pairs
 
@@ -80,6 +79,9 @@ public class Yesterday extends AppCompatActivity {
         //get application wide data
         mStepsPerCal = prefs.getInt("STEPS_PER_CAL",20);
         mMetersPerStep = util.getDouble(prefs,"METERS_PER_STEP",0.701);
+
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setIcon(R.drawable.bactivelogo);
     }
 
     public void onStart()

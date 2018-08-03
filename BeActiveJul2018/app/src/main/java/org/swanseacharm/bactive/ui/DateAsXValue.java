@@ -17,7 +17,7 @@ public class DateAsXValue extends DefaultLabelFormatter {
     /**
      * calendar to avoid creating new date objects
      */
-    private final Calendar mCalendar = Calendar.getInstance();;
+    private final Calendar mCalendar = Calendar.getInstance();
 
     /**
      * formats the x-values as date string.

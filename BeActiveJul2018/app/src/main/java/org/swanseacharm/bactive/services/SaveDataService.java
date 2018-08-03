@@ -19,7 +19,7 @@ public class SaveDataService extends Service {
     private int stepsSince12;//holder for steps taken today
 
     private String tag="SaveDataService";
-    private String fileName="stepHistory.stp";//file name
+    private String fileName="stepHistory.stp";
 
     private BroadcastReceiver receiver;
 

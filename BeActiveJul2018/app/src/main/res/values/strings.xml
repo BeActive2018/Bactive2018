@@ -16,4 +16,6 @@
     <string name="ok">ok</string>
     <string name="bad">bad</string>
     <string name="amazing">amazing</string>
+    <string name="channel_name">Bactive</string>
+    <string name="channel_description">Bactive channel</string>
 </resources>

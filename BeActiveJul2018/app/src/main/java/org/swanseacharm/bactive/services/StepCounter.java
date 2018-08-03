@@ -1,5 +1,8 @@
 package org.swanseacharm.bactive.services;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,7 +14,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import org.swanseacharm.bactive.R;
 
 import java.util.Calendar;
 
@@ -39,7 +45,6 @@ public class StepCounter extends Service {
         }
     };
 
-    private BroadcastReceiver mBootReciever;
     private BroadcastReceiver mMultiReceiver;
     private BroadcastReceiver mSaveDataReceiver;
 
@@ -67,17 +72,7 @@ public class StepCounter extends Service {
 
         //Receive if a boot has happened
         IntentFilter intentFilter = new IntentFilter("org.swanseacharm.bactive.services");
-        mBootReciever = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                mBooted=intent.getBooleanExtra("DATA_FROM_BOOTED",false);
-                if(mBooted)
-                {
-                    oldSteps=0;//reset old steps as STEP_COUNTER counts steps from boot
-                }
 
-            }
-        };
         mMultiReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {//receives requests
@@ -87,9 +82,14 @@ public class StepCounter extends Service {
                     Log.d(tag,"Fresh data request made");
                     sendFreshData();//send step count
                 }
+                mBooted=intent.getBooleanExtra("DATA_FROM_BOOTED",false);
+                if(mBooted)
+                {
+                    oldSteps=0;//reset old steps as STEP_COUNTER counts steps from boot
+                }
             }
         };
-        this.registerReceiver(mBootReciever,intentFilter);
+
         this.registerReceiver(mMultiReceiver,intentFilter);
 
         IntentFilter intentFilter2 = new IntentFilter("org.swanseacharm.bactive.SAVEDATA");
@@ -112,7 +112,9 @@ public class StepCounter extends Service {
             }
         };
         this.registerReceiver(mSaveDataReceiver,intentFilter2);
-        //JobSchedule.scheduleJob(getApplicationContext()); //may not be needed
+        JobSchedule.scheduleJob(getApplicationContext());
+
+
     }
 
     @Override
@@ -155,6 +157,8 @@ public class StepCounter extends Service {
         }
         sendFreshData();
 
+
+
         return Service.START_STICKY;
     }
 
@@ -171,7 +175,6 @@ public class StepCounter extends Service {
 
         sendBroadcast(broadcastIntent); //broadcast to auto restart service
 
-        this.unregisterReceiver(mBootReciever);
         this.unregisterReceiver(mMultiReceiver);
         this.unregisterReceiver(mSaveDataReceiver);
     }

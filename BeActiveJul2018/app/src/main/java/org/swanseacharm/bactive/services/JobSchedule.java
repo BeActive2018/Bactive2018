@@ -21,12 +21,13 @@ public class JobSchedule {
         futureCalender.set(Calendar.SECOND,0);//11:58:00PM
         futureCalender.set(Calendar.MILLISECOND,0);//11:58:00.000PM
 
+        calendar.setTimeInMillis(System.currentTimeMillis());//set first calender to now
         if(futureCalender.before(calendar))//if the it is after 11:58:00.000 then set the job for tomorrow.
         {
             futureCalender.add(Calendar.DATE,+1);
         }
 
-        calendar.setTimeInMillis(System.currentTimeMillis());//set first calender to now
+
 
         //build job
         ComponentName serviceComponent = new ComponentName(context, JobScheduleService.class);
